@@ -28,14 +28,7 @@ class Poisson1D:
 
 
     def solve(self, tol, maxiter):
-        self.status = 'maxiter'
-
-        for _ in range(maxiter):
-            self.step()
-
-            if np.linalg.norm(self.r) < tol:
-                self.status = 'ok'
-                break
+        pass
 
 
 class MatrixFreeSolver(Poisson1D):
@@ -56,6 +49,84 @@ class MatrixFreeSolver(Poisson1D):
 
     def residual(self):
         return self.b - self.action(self.u)
+
+
+    def step(self):
+        pass
+
+
+    def solve(self, tol, maxiter):
+        self.status = 'maxiter'
+        self.r = self.residual()
+
+        for _ in range(maxiter):
+            self.step()
+            self.r = self.residual()
+
+            if np.linalg.norm(self.r) < tol:
+                self.status = 'ok'
+                break
+
+
+class JacobiSolver(MatrixFreeSolver):
+    def __init__(self, inf, sup, n, f, boundary):
+        super().__init__(inf, sup, n, f, boundary)
+        self.label = 'jacobi'
+
+
+    def step(self):
+        y = np.empty_like(self.U)
+        y[0] = self.u[0]
+        y[-1] = self.u[-1]
+
+        for i in range(1,self.n-1):
+            y[i] = b[i] + (self.u[i-1] + self.u[i+1]) / self.h**2
+
+        self.u = y
+
+
+class GaussSeidelSolver(MatrixFreeSolver):
+    def __init__(self, inf, sup, n, f, boundary):
+        super().__init__(inf, sup, n, f, boundary)
+        self.label = 'gseidel'
+
+
+    def step(self):
+        for i in range(1,self.n-1):
+            self.u[i] = b[i] + (self.u[i-1] + self.u[i+1]) / self.h**2
+
+
+class CgSolver(MatrixFreeSolver):
+    def __init__(self, inf, sup, n, f, boundary):
+        super().__init__(inf, sup, n, f, boundary)
+        self.label = 'cg'
+        self.r = self.residual()
+        self.d = self.r
+
+
+    def step(self):
+        y      = self.action(d)
+
+        alpha  = np.dot(self.r, self.r) / np.dot(self.d, y)
+        old    = self.r
+
+        self.u = self.u + alpha * self.d
+        self.r = self.residual()
+
+        beta   = np.dot(self.r, self.r) / np.dot(old,old)
+        self.d = self.r + beta * self.d
+
+
+    # to remove the unnecessary recomputing of the residual, there is this little duplication in the solving logic
+    def solve(self, tol, maxiter):
+        self.status = 'maxiter'
+
+        for _ in range(maxiter):
+            self.step()
+
+            if np.linalg.norm(self.r) < tol:
+                self.status = 'ok'
+                break
 
 
 class DirectSolver(Poisson1D):
