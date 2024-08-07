@@ -23,17 +23,14 @@ class Poisson1D:
         pass
 
 
-    def step(self):
-        pass
-
-
-    def solve(self, tol, maxiter):
+    def solve(self):
         pass
 
 
 class MatrixFreeSolver(Poisson1D):
     def __init__(self, inf, sup, n, f, boundary):
         super().__init__(inf, sup, n, f, boundary)
+        self.it = 0
 
 
     def action(self, x):
@@ -52,7 +49,7 @@ class MatrixFreeSolver(Poisson1D):
 
 
     def step(self):
-        pass
+        self.it = self.it + 1
 
 
     def solve(self, tol, maxiter):
@@ -75,12 +72,14 @@ class JacobiSolver(MatrixFreeSolver):
 
 
     def step(self):
-        y = np.empty_like(self.U)
+        super().step()
+
+        y = np.zeros_like(self.u)
         y[0] = self.u[0]
         y[-1] = self.u[-1]
 
         for i in range(1,self.n-1):
-            y[i] = b[i] + (self.u[i-1] + self.u[i+1]) / self.h**2
+            y[i] = (self.h**2 * self.b[i] + self.u[i-1] + self.u[i+1]) / 2
 
         self.u = y
 
@@ -92,8 +91,10 @@ class GaussSeidelSolver(MatrixFreeSolver):
 
 
     def step(self):
+        super().step()
+
         for i in range(1,self.n-1):
-            self.u[i] = b[i] + (self.u[i-1] + self.u[i+1]) / self.h**2
+            self.u[i] = (self.h**2 * self.b[i] + self.u[i-1] + self.u[i+1]) / 2
 
 
 class CgSolver(MatrixFreeSolver):
@@ -105,7 +106,9 @@ class CgSolver(MatrixFreeSolver):
 
 
     def step(self):
-        y      = self.action(d)
+        super().step()
+
+        y      = self.action(self.d)
 
         alpha  = np.dot(self.r, self.r) / np.dot(self.d, y)
         old    = self.r
@@ -216,6 +219,15 @@ class TestPoissonSolvers(unittest.TestCase):
 
         self.assertTrue(np.allclose(self.dense.A @ x, self.sparse.A.dot(x)))
         self.assertTrue(np.allclose(self.dense.A @ x, self.mfree.action(x)))
+
+
+    def test_residual_calculation(self):
+        x = np.random.rand(self.dense.u.shape[0])
+
+        self.dense.u = x
+        self.mfree.u = x
+
+        self.assertTrue(np.allclose(self.dense.residual(), self.mfree.residual()))
 
 
 if __name__ == '__main__':
