@@ -15,8 +15,6 @@ class Poisson1D:
         self.b[0]  = self.u[0]
         self.b[-1] = self.u[-1]
 
-        self.r = self.residual()
-
 
     def residual(self):
         pass
@@ -40,14 +38,15 @@ class Poisson1D:
 class DirectSolver(Poisson1D):
     def __init__(self, inf, sup, n, f, boundary):
         super().__init__(inf, sup, n, f, boundary)
+        self.label = 'direct'
 
         A = np.zeros((n,n))
         for i in range(1,n-1):
-            A[i,i-1] =  1
-            A[i,i]   = -2
-            A[i,i+1] =  1
+            A[i,i-1] = -1
+            A[i,i]   =  2
+            A[i,i+1] = -1
 
-        A = h ** 2 * A
+        A = A / self.h ** 2
         A[0,0] = 1
         A[n-1,n-1] = 1
 
