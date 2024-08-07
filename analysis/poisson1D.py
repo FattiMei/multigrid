@@ -37,6 +37,26 @@ class Poisson1D:
                 break
 
 
+class MatrixFreeSolver(Poisson1D):
+    def __init__(self, inf, sup, n, f, boundary):
+        super().__init__(inf, sup, n, f, boundary)
+
+
+    def action(self, x):
+        y = np.empty_like(x)
+        y[0] = x[0]
+        y[-1] = x[-1]
+
+        for i in range(1,self.n-1):
+            y[i] = (2*x[i] - x[i-1] - x[i+1]) / self.h**2
+
+        return x
+
+
+    def residual(self):
+        return self.b - self.action(self.u)
+
+
 class DirectSolver(Poisson1D):
     def __init__(self, inf, sup, n, f, boundary):
         super().__init__(inf, sup, n, f, boundary)
