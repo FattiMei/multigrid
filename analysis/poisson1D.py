@@ -1,4 +1,5 @@
 import numpy as np
+import sympy as sym
 import scipy
 import unittest
 
@@ -111,5 +112,26 @@ class SparseDirectSolver(Poisson1D):
         self.status = 'ok'
 
 
+class TestPoissonSolvers(unittest.TestCase):
+    def setUp(self):
+        x  = sym.symbols('x')
+        u  = x**2 * sym.sin(2 * sym.pi * x)
+
+        exact = sym.lambdify(x, u)
+        f  = sym.lambdify(x, -sym.diff(u,x,2))
+
+        n        = 100
+        inf, sup = 0, 1
+        boundary = (exact(inf), exact(sup))
+
+        self.dense  = DirectSolver      (inf, sup, n, f, boundary)
+        self.sparse = SparseDirectSolver(inf, sup, n, f, boundary)
+
+
+    def test_sparse_repr(self):
+        self.assertTrue(np.allclose(self.dense.A, self.sparse.dense_repr()))
+
+
+
 if __name__ == '__main__':
-    pass
+    unittest.main()
