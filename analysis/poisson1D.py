@@ -1,4 +1,6 @@
 import numpy as np
+import scipy
+import unittest
 
 
 class Poisson1D:
@@ -57,6 +59,37 @@ class DirectSolver(Poisson1D):
         return self.b - self.A @ self.u
 
 
-    def solve(self, tol, maxiter):
+    def solve(self, *args):
         self.u      = np.linalg.solve(self.A, self.b)
         self.status = 'ok'
+
+
+class SparseDirectSolver(Poisson1D):
+    def __init__(self, inf, sup, n, f, boundary):
+        super().__init__(inf, sup, n, f, boundary)
+        self.label = 'sparse'
+
+        # I need to build the matrix A as sparse because memory is a problem
+        h        = self.h
+        diagonal = np.concatenate([np.ones(1), 2*np.ones(n-2)/h**2, np.ones(1)])
+        upper    = np.concatenate([np.zeros(1), -np.ones(n-2)/h**2])
+        lower    = np.concatenate([-np.ones(n-2)/h**2, np.zeros(1)])
+
+        self.A   = scipy.sparse.diags([diagonal, upper, lower], [0, 1, -1], format='csr')
+
+
+    def dense_repr(self):
+        return self.A.toarray()
+
+
+    def residual(self):
+        return self.b - self.A.dot(self.u)
+
+
+    def solve(self):
+        self.u = scipy.sparse.linalg.spsolve(self.A, self.b)
+        self.status = 'ok'
+
+
+if __name__ == '__main__':
+    pass
