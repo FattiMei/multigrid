@@ -51,7 +51,7 @@ class MatrixFreeSolver(Poisson1D):
         for i in range(1,self.n-1):
             y[i] = (2*x[i] - x[i-1] - x[i+1]) / self.h**2
 
-        return x
+        return y
 
 
     def residual(self):
@@ -126,11 +126,25 @@ class TestPoissonSolvers(unittest.TestCase):
 
         self.dense  = DirectSolver      (inf, sup, n, f, boundary)
         self.sparse = SparseDirectSolver(inf, sup, n, f, boundary)
+        self.mfree  = MatrixFreeSolver  (inf, sup, n, f, boundary)
 
 
     def test_sparse_repr(self):
         self.assertTrue(np.allclose(self.dense.A, self.sparse.dense_repr()))
 
+
+    def test_direct_solvers(self):
+        self.dense.solve()
+        self.sparse.solve()
+
+        self.assertTrue(np.allclose(self.dense.u, self.sparse.u))
+
+
+    def test_matrix_free_action(self):
+        x = np.random.rand(self.dense.u.shape[0])
+
+        self.assertTrue(np.allclose(self.dense.A @ x, self.sparse.A.dot(x)))
+        self.assertTrue(np.allclose(self.dense.A @ x, self.mfree.action(x)))
 
 
 if __name__ == '__main__':
