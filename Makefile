@@ -6,7 +6,7 @@ INCLUDE    = -I ./include
 all: hello
 
 
-hello: build/main.o
+hello: build/main.o build/utils.o build/poisson1D.o
 	$(CXX) -o $@ $^
 
 
