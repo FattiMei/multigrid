@@ -1,2 +1,5 @@
-presentation.odp
 build/
+*/__pycache__
+hello
+presentation.odp
+.~lock.presentation.odp#
