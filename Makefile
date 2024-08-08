@@ -12,3 +12,8 @@ hello: build/main.o build/utils.o build/poisson1D.o
 
 build/%.o: src/%.cpp
 	$(CXX) -c $(WARNINGS) $(INCLUDE) -o $@ $^
+
+
+.PHONY clean:
+clean:
+	rm -f build/*.o hello
