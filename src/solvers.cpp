@@ -35,8 +35,3 @@ void IterativeSolver::solve(const double tol, const int maxiter) {
 		}
 	}
 }
-
-
-void GsSolver::step() {
-	smoother.smooth(n, problem.get_rhs(), u);
-}

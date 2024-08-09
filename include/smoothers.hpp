@@ -5,9 +5,10 @@
 #include "poisson1D.hpp"
 
 
-class Smoother {
+namespace Smoother {
+class BaseSmoother {
 	public:
-		Smoother(const Poisson1D &problem);
+		BaseSmoother(const Poisson1D &problem);
 		virtual double* smooth(const int n, const double b[], double u[]) = 0;
 
 
@@ -16,7 +17,7 @@ class Smoother {
 };
 
 
-class Jacobi : public Smoother {
+class Jacobi : public BaseSmoother {
 	public:
 		Jacobi(const Poisson1D &problem);
 		~Jacobi();
@@ -29,17 +30,19 @@ class Jacobi : public Smoother {
 };
 
 
-class GS : public Smoother {
+class GSeidel : public BaseSmoother {
 	public:
-		GS(const Poisson1D &problem) : Smoother(problem) {};
+		GSeidel(const Poisson1D &problem) : BaseSmoother(problem) {};
 		double* smooth(const int n, const double b[], double u[]);
 };
 
 
-class RedBlack : public Smoother {
+class RedBlack : public BaseSmoother {
 	public:
+		RedBlack(const Poisson1D &problem) : BaseSmoother(problem) {};
 		double* smooth(const int n, const double b[], double u[]);
 };
+}
 
 
 #endif

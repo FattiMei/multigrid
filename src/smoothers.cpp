@@ -1,10 +1,13 @@
 #include "smoothers.hpp"
 
 
-Smoother::Smoother(const Poisson1D &problem) : iteration_formula(problem.get_iteration_formula()) {}
+using namespace Smoother;
 
 
-Jacobi::Jacobi(const Poisson1D &problem) : Smoother(problem) {
+BaseSmoother::BaseSmoother(const Poisson1D &problem) : iteration_formula(problem.get_iteration_formula()) {}
+
+
+Jacobi::Jacobi(const Poisson1D &problem) : BaseSmoother(problem) {
 	// allocate local working memory
 }
 
@@ -22,7 +25,7 @@ double* Jacobi::smooth(const int n, const double b[], double u[]) {
 }
 
 
-double* GS::smooth(const int n, const double b[], double u[]) {
+double* GSeidel::smooth(const int n, const double b[], double u[]) {
 	for (int i = 1; i < n-1; ++i) {
 		iteration_formula(i, b, u, u);
 	}

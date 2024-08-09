@@ -42,14 +42,17 @@ class IterativeSolver : public BaseSolver {
 };
 
 
-class GsSolver : public IterativeSolver {
+template <class Smoother>
+class SmootherSolver : public IterativeSolver {
 	public:
-		GsSolver(const Poisson1D &problem, InitializationStrategy strategy) : IterativeSolver(problem, strategy), smoother(problem) {};
-		void step();
+		SmootherSolver(const Poisson1D &problem, InitializationStrategy strategy) : IterativeSolver(problem, strategy), smoother(problem) {};
+		void step() {
+			smoother.smooth(n, problem.get_rhs(), u);
+		};
 
 
 	private:
-		GS smoother;
+		Smoother smoother;
 };
 
 

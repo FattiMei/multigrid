@@ -17,7 +17,7 @@ int main() {
 	);
 
 	// @TODO: add default initialization strategy
-	GsSolver solver(problem, InitializationStrategy::Lerp);
+	SmootherSolver<Smoother::GSeidel> solver(problem, InitializationStrategy::Lerp);
 
 	std::cout << "step,rnorm" << std::endl;
 	for (int i = 0; i < MAXITER; ++i) {
