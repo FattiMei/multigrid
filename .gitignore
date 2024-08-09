@@ -1,5 +1,6 @@
 build/
 */__pycache__
 hello
+convergence
 presentation.odp
 .~lock.presentation.odp#

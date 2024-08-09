@@ -16,7 +16,7 @@ enum class SolverStatus {
 class BaseSolver {
 	public:
 		BaseSolver(const Poisson1D &problem);
-		~BaseSolver();
+		virtual ~BaseSolver();
 
 
 	protected:
