@@ -31,6 +31,7 @@ class Jacobi : public Smoother {
 
 class GS : public Smoother {
 	public:
+		GS(const Poisson1D &problem) : Smoother(problem) {};
 		double* smooth(const int n, const double b[], double u[]);
 };
 

@@ -11,6 +11,16 @@ BaseSolver::~BaseSolver() {
 }
 
 
+IterativeSolver::IterativeSolver(const Poisson1D &problem, InitializationStrategy strategy) : BaseSolver(problem) {
+	problem.set_initial_approximation(u, strategy);
+}
+
+
+double IterativeSolver::get_residual_norm() {
+	return problem.get_residual_norm(u);
+}
+
+
 void IterativeSolver::solve(const double tol, const int maxiter) {
 	if (status == SolverStatus::OK) {
 		status = SolverStatus::MAXIT;
@@ -24,4 +34,9 @@ void IterativeSolver::solve(const double tol, const int maxiter) {
 			}
 		}
 	}
+}
+
+
+void GsSolver::step() {
+	smoother.smooth(n, problem.get_rhs(), u);
 }

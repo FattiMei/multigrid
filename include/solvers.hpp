@@ -3,6 +3,7 @@
 
 
 #include "poisson1D.hpp"
+#include "smoothers.hpp"
 
 
 enum class SolverStatus {
@@ -26,17 +27,29 @@ class BaseSolver {
 
 
 // a solver with stepping logic
-class IterativeSolver : BaseSolver {
+class IterativeSolver : public BaseSolver {
 	public:
-		IterativeSolver(const Poisson1D &problem);
+		IterativeSolver(const Poisson1D &problem, InitializationStrategy strategy);
 
-		virtual void step();
-			void solve(const double tol, const int maxiter);
+			double	get_residual_norm();
+		virtual	void	step() = 0;
+			void	solve(const double tol, const int maxiter);
 
 
 	protected:
 		SolverStatus status = SolverStatus::OK;
 		int it;
+};
+
+
+class GsSolver : public IterativeSolver {
+	public:
+		GsSolver(const Poisson1D &problem, InitializationStrategy strategy) : IterativeSolver(problem, strategy), smoother(problem) {};
+		void step();
+
+
+	private:
+		GS smoother;
 };
 
 
