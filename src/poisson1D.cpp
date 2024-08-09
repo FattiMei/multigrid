@@ -66,7 +66,9 @@ double Poisson1D::get_residual_norm(const double u[]) const {
 	double norm = 0.0;
 
 	for (int i = 1; i < n-1; ++i) {
-		norm += b[i] - (2.0*u[i] - u[i-1] - u[i+1]) / (h*h);
+		const double term = b[i] - (2.0*u[i] - u[i-1] - u[i+1]) / (h*h);
+
+		norm += term * term;
 	}
 
 	return std::sqrt(norm);

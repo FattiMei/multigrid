@@ -19,8 +19,6 @@ int main() {
 	// @TODO: add default initialization strategy
 	GsSolver solver(problem, InitializationStrategy::Lerp);
 
-	// @BUG: doesn't converge to full precision
-
 	std::cout << "step,rnorm" << std::endl;
 	for (int i = 0; i < MAXITER; ++i) {
 		std::cout << i << "," << solver.get_residual_norm() << std::endl;
