@@ -1,5 +1,6 @@
 build/
 */__pycache__
+analysis/.ipynb_checkpoints/
 hello
 convergence
 presentation.odp
