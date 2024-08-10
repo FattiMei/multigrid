@@ -21,7 +21,9 @@ int main() {
 
 	// nice declarative style, a little too cumbersome IMO
 	const std::vector<std::pair<std::string,IterativeSolver*>> solvers{
-		{"gseidel", new SmootherSolver<Smoother::GSeidel>(problem, InitializationStrategy::Zeros)}
+		{"jacobi^2" , new SmootherSolver<Smoother::Jacobi>  (problem, InitializationStrategy::Zeros)},
+		{"gseidel"  , new SmootherSolver<Smoother::GSeidel> (problem, InitializationStrategy::Zeros)},
+		{"red-black", new SmootherSolver<Smoother::RedBlack>(problem, InitializationStrategy::Zeros)}
 	};
 
 
@@ -46,6 +48,7 @@ int main() {
 
 
 	// good practice to free memory
+	// @TODO: use callgrind to assess no memory leak
 	for (auto [_, solver] : solvers) {
 		delete solver;
 	}

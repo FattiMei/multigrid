@@ -8,18 +8,24 @@ BaseSmoother::BaseSmoother(const Poisson1D &problem) : iteration_formula(problem
 
 
 Jacobi::Jacobi(const Poisson1D &problem) : BaseSmoother(problem) {
-	// allocate local working memory
+	local = new double[problem.get_problem_size()];
 }
 
 
 Jacobi::~Jacobi() {
-	// deallocate local working memory
+	delete[] local;
 }
 
 
 double* Jacobi::smooth(const int n, const double b[], double u[]) {
-	(void) n;
-	(void) b;
+	// Jersey style, does two sweeps
+	for (int i = 1; i < n-1; ++i) {
+		iteration_formula(i, b, u, local);
+	}
+
+	for (int i = 1; i < n-1; ++i) {
+		iteration_formula(i, b, local, u);
+	}
 
 	return u;
 }
