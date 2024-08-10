@@ -8,21 +8,22 @@
 namespace Smoother {
 class BaseSmoother {
 	public:
-		BaseSmoother(const Poisson1D &problem);
-		virtual double* smooth(const int n, const double b[], double u[]) = 0;
+		BaseSmoother(const int n, const Update iteration_formula);
+		virtual void smooth(const double b[], double u[]) = 0;
 
 
 	protected:
 		const Update iteration_formula;
+		const int n;
 };
 
 
 class Jacobi : public BaseSmoother {
 	public:
-		Jacobi(const Poisson1D &problem);
+		Jacobi(const int n, const Update iteration_formula);
 		~Jacobi();
 
-		double* smooth(const int n, const double b[], double u[]);
+		void smooth(const double b[], double u[]);
 
 
 	private:
@@ -32,15 +33,15 @@ class Jacobi : public BaseSmoother {
 
 class GSeidel : public BaseSmoother {
 	public:
-		GSeidel(const Poisson1D &problem) : BaseSmoother(problem) {};
-		double* smooth(const int n, const double b[], double u[]);
+		GSeidel(const int n, const Update iteration_formula) : BaseSmoother(n, iteration_formula) {};
+		void smooth(const double b[], double u[]);
 };
 
 
 class RedBlack : public BaseSmoother {
 	public:
-		RedBlack(const Poisson1D &problem) : BaseSmoother(problem) {};
-		double* smooth(const int n, const double b[], double u[]);
+		RedBlack(const int n, const Update iteration_formula) : BaseSmoother(n, iteration_formula) {};
+		void smooth(const double b[], double u[]);
 };
 }
 

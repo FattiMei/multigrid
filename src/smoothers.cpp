@@ -4,11 +4,11 @@
 using namespace Smoother;
 
 
-BaseSmoother::BaseSmoother(const Poisson1D &problem) : iteration_formula(problem.get_iteration_formula()) {}
+BaseSmoother::BaseSmoother(const int n_, const Update iteration_formula_) : iteration_formula(iteration_formula_), n(n_) {}
 
 
-Jacobi::Jacobi(const Poisson1D &problem) : BaseSmoother(problem) {
-	local = new double[problem.get_problem_size()];
+Jacobi::Jacobi(const int n, const Update iteration_formula) : BaseSmoother(n, iteration_formula) {
+	local = new double[n];
 }
 
 
@@ -17,7 +17,7 @@ Jacobi::~Jacobi() {
 }
 
 
-double* Jacobi::smooth(const int n, const double b[], double u[]) {
+void Jacobi::smooth(const double b[], double u[]) {
 	// Jersey style, does two sweeps
 	for (int i = 1; i < n-1; ++i) {
 		iteration_formula(i, b, u, local);
@@ -26,21 +26,17 @@ double* Jacobi::smooth(const int n, const double b[], double u[]) {
 	for (int i = 1; i < n-1; ++i) {
 		iteration_formula(i, b, local, u);
 	}
-
-	return u;
 }
 
 
-double* GSeidel::smooth(const int n, const double b[], double u[]) {
+void GSeidel::smooth(const double b[], double u[]) {
 	for (int i = 1; i < n-1; ++i) {
 		iteration_formula(i, b, u, u);
 	}
-
-	return u;
 }
 
 
-double* RedBlack::smooth(const int n, const double b[], double u[]) {
+void RedBlack::smooth(const double b[], double u[]) {
 	for (int i = 1; i < n-1; i += 2) {
 		iteration_formula(i, b, u, u);
 	}
@@ -48,6 +44,4 @@ double* RedBlack::smooth(const int n, const double b[], double u[]) {
 	for (int i = 2; i < n-1; i += 2) {
 		iteration_formula(i, b, u, u);
 	}
-
-	return u;
 }

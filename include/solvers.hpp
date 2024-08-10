@@ -45,9 +45,9 @@ class IterativeSolver : public BaseSolver {
 template <class Smoother>
 class SmootherSolver : public IterativeSolver {
 	public:
-		SmootherSolver(const Poisson1D &problem, InitializationStrategy strategy) : IterativeSolver(problem, strategy), smoother(problem) {};
+		SmootherSolver(const Poisson1D &problem, InitializationStrategy strategy) : IterativeSolver(problem, strategy), smoother(problem.get_problem_size(), problem.get_iteration_formula()) {};
 		void step() {
-			smoother.smooth(n, problem.get_rhs(), u);
+			smoother.smooth(problem.get_rhs(), u);
 		};
 
 
