@@ -1,7 +1,7 @@
 #include "solvers.hpp"
 
 
-BaseSolver::BaseSolver(const Poisson1D &problem_) : problem(problem_), n(problem.get_problem_size()) {
+BaseSolver::BaseSolver(const Poisson1D &problem_) : problem(problem_), n(problem.get_problem_size()), rhs(problem.get_rhs()) {
 	u = new double[n];
 }
 

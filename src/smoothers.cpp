@@ -45,3 +45,14 @@ void RedBlack::smooth(const double b[], double u[]) {
 		iteration_formula(i, b, u, u);
 	}
 }
+
+
+void BlackRed::smooth(const double b[], double u[]) {
+	for (int i = 2; i < n-1; i += 2) {
+		iteration_formula(i, b, u, u);
+	}
+
+	for (int i = 1; i < n-1; i += 2) {
+		iteration_formula(i, b, u, u);
+	}
+}

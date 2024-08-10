@@ -18,11 +18,14 @@ class BaseSolver {
 		BaseSolver(const Poisson1D &problem);
 		virtual ~BaseSolver();
 
+		void	set_rhs(const double *rhs);
+
 
 	protected:
 		const Poisson1D &problem;
 		const int n;
 		double *u;
+		const double *rhs;
 };
 
 
@@ -47,7 +50,7 @@ class SmootherSolver : public IterativeSolver {
 	public:
 		SmootherSolver(const Poisson1D &problem, InitializationStrategy strategy) : IterativeSolver(problem, strategy), smoother(problem.get_problem_size(), problem.get_iteration_formula()) {};
 		void step() {
-			smoother.smooth(problem.get_rhs(), u);
+			smoother.smooth(rhs, u);
 		};
 
 

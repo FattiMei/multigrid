@@ -43,6 +43,13 @@ class RedBlack : public BaseSmoother {
 		RedBlack(const int n, const Update iteration_formula) : BaseSmoother(n, iteration_formula) {};
 		void smooth(const double b[], double u[]);
 };
+
+
+class BlackRed : public BaseSmoother {
+	public:
+		BlackRed(const int n, const Update iteration_formula) : BaseSmoother(n, iteration_formula) {};
+		void smooth(const double b[], double u[]);
+};
 }
 
 

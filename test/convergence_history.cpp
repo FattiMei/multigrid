@@ -23,7 +23,8 @@ int main() {
 	const std::vector<std::pair<std::string,IterativeSolver*>> solvers{
 		{"jacobi^2" , new SmootherSolver<Smoother::Jacobi>  (problem, InitializationStrategy::Zeros)},
 		{"gseidel"  , new SmootherSolver<Smoother::GSeidel> (problem, InitializationStrategy::Zeros)},
-		{"red-black", new SmootherSolver<Smoother::RedBlack>(problem, InitializationStrategy::Zeros)}
+		{"red-black", new SmootherSolver<Smoother::RedBlack>(problem, InitializationStrategy::Zeros)},
+		{"black-red", new SmootherSolver<Smoother::BlackRed>(problem, InitializationStrategy::Zeros)}
 	};
 
 
