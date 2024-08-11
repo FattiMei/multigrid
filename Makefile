@@ -10,7 +10,7 @@ hello: build/main.o build/utils.o build/poisson1D.o build/smoothers.o build/solv
 	$(CXX) -o $@ $^
 
 
-convergence: build/convergence_history.o build/utils.o build/poisson1D.o build/smoothers.o build/solvers.o
+convergence: build/convergence_history.o build/utils.o build/poisson1D.o build/smoothers.o build/solvers.o build/multigrid.o
 	$(CXX) -o $@ $^
 
 

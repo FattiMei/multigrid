@@ -26,4 +26,11 @@ class MgSolver : public IterativeSolver {
 };
 
 
+void injective_restriction  (const int n, const double src[], double dest[]);
+void full_weight_restriction(const int n, const double src[], double dest[]);
+
+
+void linear_prolongation(const int m, const double src[], double dest[]);
+
+
 #endif
