@@ -53,9 +53,9 @@ const double* Poisson1D::get_rhs() const {
 }
 
 
-const Update Poisson1D::get_iteration_formula() const {
-	return [this](int i, const double b[], const double src[], double dest[]) {
-		const double h = this->h;
+const Update Poisson1D::get_iteration_formula(const int level) const {
+	return [this, level](int i, const double b[], const double src[], double dest[]) {
+		const double h = std::pow(2.0, level) * this->h;
 
 		dest[i] = (h*h*b[i] + src[i-1] + src[i+1]) / 2.0;
 	};
