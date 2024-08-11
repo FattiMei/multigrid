@@ -3,52 +3,36 @@
 
 
 #include "poisson1D.hpp"
+#include <vector>
 
 
 namespace Smoother {
-class BaseSmoother {
+class Jacobi {
 	public:
-		BaseSmoother(const int n, const Update iteration_formula);
-		virtual void smooth(const double b[], double u[]) = 0;
-
-
-	protected:
-		const Update iteration_formula;
-		const int n;
-};
-
-
-class Jacobi : public BaseSmoother {
-	public:
-		Jacobi(const int n, const Update iteration_formula);
-		~Jacobi();
-
-		void smooth(const double b[], double u[]);
+		void operator () (const Update formula, const int n, const double b[], double u[]);
 
 
 	private:
-		double *local;
+		// Use std::vector and not a simple pointer to make use of RAII (omitting destructors)
+		std::vector<double> local;
 };
 
 
-class GSeidel : public BaseSmoother {
+class GSeidel {
 	public:
-		GSeidel(const int n, const Update iteration_formula) : BaseSmoother(n, iteration_formula) {};
-		void smooth(const double b[], double u[]);
+		void operator () (const Update formula, const int n, const double b[], double u[]);
 };
 
 
-class RedBlack : public BaseSmoother {
+class RedBlack {
 	public:
-		RedBlack(const int n, const Update iteration_formula) : BaseSmoother(n, iteration_formula) {};
-		void smooth(const double b[], double u[]);
+		void operator () (const Update formula, const int n, const double b[], double u[]);
 };
 
 
-class BlackRed : public BaseSmoother {
+class BlackRed {
 	public:
-		BlackRed(const int n, const Update iteration_formula) : BaseSmoother(n, iteration_formula) {};
-		void smooth(const double b[], double u[]);
+		void operator () (const Update formula, const int n, const double b[], double u[]);
 };
 }
 

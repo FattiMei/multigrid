@@ -4,55 +4,47 @@
 using namespace Smoother;
 
 
-BaseSmoother::BaseSmoother(const int n_, const Update iteration_formula_) : iteration_formula(iteration_formula_), n(n_) {}
+void Jacobi::operator()(Update formula, const int n, const double b[], double u[]) {
+	// @DESIGN: this condition will be met at the first call of the function and then will never happen. The branch predictor will optimize
+	if (n > static_cast<int>(local.size())) {
+		local.resize(n);
+	}
 
-
-Jacobi::Jacobi(const int n, const Update iteration_formula) : BaseSmoother(n, iteration_formula) {
-	local = new double[n];
-}
-
-
-Jacobi::~Jacobi() {
-	delete[] local;
-}
-
-
-void Jacobi::smooth(const double b[], double u[]) {
 	// Jersey style, does two sweeps
 	for (int i = 1; i < n-1; ++i) {
-		iteration_formula(i, b, u, local);
+		formula(i, b, u, local.data());
 	}
 
 	for (int i = 1; i < n-1; ++i) {
-		iteration_formula(i, b, local, u);
+		formula(i, b, local.data(), u);
 	}
 }
 
 
-void GSeidel::smooth(const double b[], double u[]) {
+void GSeidel::operator()(Update formula, const int n, const double b[], double u[]) {
 	for (int i = 1; i < n-1; ++i) {
-		iteration_formula(i, b, u, u);
+		formula(i, b, u, u);
 	}
 }
 
 
-void RedBlack::smooth(const double b[], double u[]) {
+void RedBlack::operator()(Update formula, const int n, const double b[], double u[]) {
 	for (int i = 1; i < n-1; i += 2) {
-		iteration_formula(i, b, u, u);
+		formula(i, b, u, u);
 	}
 
 	for (int i = 2; i < n-1; i += 2) {
-		iteration_formula(i, b, u, u);
+		formula(i, b, u, u);
 	}
 }
 
 
-void BlackRed::smooth(const double b[], double u[]) {
+void BlackRed::operator()(Update formula, const int n, const double b[], double u[]) {
 	for (int i = 2; i < n-1; i += 2) {
-		iteration_formula(i, b, u, u);
+		formula(i, b, u, u);
 	}
 
 	for (int i = 1; i < n-1; i += 2) {
-		iteration_formula(i, b, u, u);
+		formula(i, b, u, u);
 	}
 }
