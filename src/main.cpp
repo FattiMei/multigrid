@@ -1,6 +1,7 @@
 #include <iostream>
 #include "poisson1D.hpp"
 #include "solvers.hpp"
+#include "multigrid.hpp"
 
 
 #define MAXITER 2000
