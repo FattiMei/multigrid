@@ -25,7 +25,7 @@ class BaseSolver {
 		const Poisson1D &problem;
 		const int n;
 		double *u;
-		const double *rhs;
+		double *rhs;
 };
 
 

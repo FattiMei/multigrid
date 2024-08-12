@@ -48,8 +48,8 @@ int Poisson1D::get_problem_size() const {
 }
 
 
-const double* Poisson1D::get_rhs() const {
-	return static_cast<const double *>(b);
+double* Poisson1D::get_rhs() const {
+	return b;
 }
 
 
