@@ -3,11 +3,12 @@
 #include "poisson1D.hpp"
 #include "smoothers.hpp"
 #include "solvers.hpp"
+#include "multigrid.hpp"
 
 
 // @TODO(minor detail) make the problem size a command line parameter
 int main() {
-	constexpr int n       = 1000;
+	constexpr int n       = 1001;
 	constexpr int maxiter = 2000;
 
 	const Poisson1D problem(
@@ -19,12 +20,26 @@ int main() {
 	);
 
 
+	const std::vector<MgOp> recipe {
+		MgOp::Relax,
+		MgOp::Restrict,
+		MgOp::Relax,
+		MgOp::Prolong,
+		MgOp::Relax
+	};
+
+
+	const std::vector<MgOp> only_smooth {
+		MgOp::Relax,
+		MgOp::Relax
+	};
+
+
 	// nice declarative style, a little too cumbersome IMO
 	const std::vector<std::pair<std::string,IterativeSolver*>> solvers{
-		{"jacobi^2" , new SmootherSolver<Smoother::Jacobi>  (problem, InitializationStrategy::Zeros)},
-		{"gseidel"  , new SmootherSolver<Smoother::GSeidel> (problem, InitializationStrategy::Zeros)},
-		{"red-black", new SmootherSolver<Smoother::RedBlack>(problem, InitializationStrategy::Zeros)},
-		{"black-red", new SmootherSolver<Smoother::BlackRed>(problem, InitializationStrategy::Zeros)}
+		{"gseidel"     , new SmootherSolver<Smoother::GSeidel> (problem, InitializationStrategy::Zeros)},
+		{"gseidel^2"   , new MgSolver(problem, only_smooth, InitializationStrategy::Zeros)},
+		{"two-level MG", new MgSolver(problem, recipe, InitializationStrategy::Zeros)},
 	};
 
 

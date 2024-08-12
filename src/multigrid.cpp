@@ -18,6 +18,7 @@ MgSolver::MgSolver(const Poisson1D &problem, const std::vector<MgOp> recipe_, In
 	rhs_memory      = new double[total_elements - n];
 	residual_memory = new double[total_elements];
 
+
 	// @DESIGN: this complication is necessary because:
 	//   1. It's desirable to do allocations in big chunks (improve heap locality)
 	//   2. There is memory already allocated (u comes from BaseSolver, rhs from Poisson1D)
@@ -56,6 +57,8 @@ void MgSolver::step() {
 				for (int i = 1; i < grid_size[level]; ++i) {
 					formula(i, grid_rhs[level], grid_solution[level], grid_residual[level]);
 				}
+
+				for (int i = 0; i < grid_size[level+1]; ++i) grid_solution[level+1][i] = 0.0;
 
 				full_weight_restriction(grid_size[level], grid_residual[level], grid_rhs[level+1]);
 				++level;

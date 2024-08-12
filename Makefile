@@ -14,6 +14,11 @@ convergence: build/convergence_history.o build/utils.o build/poisson1D.o build/s
 	$(CXX) -o $@ $^
 
 
+test_convergence: convergence
+	./$^ > convergence.out
+	python plot/convergence_history.py convergence.out
+
+
 build/%.o: src/%.cpp
 	$(CXX) -c $(WARNINGS) $(INCLUDE) -o $@ $^
 
