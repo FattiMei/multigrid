@@ -47,7 +47,7 @@ void MgSolver::step() {
 	for (const auto op : recipe) {
 		switch (op) {
 			case MgOp::Relax: {
-				smoother(grid_iteration_formula[level], grid_size[level], grid_rhs[level], grid_solution[level]);
+				smoother(grid_iteration_formula[level], grid_size[level], grid_rhs[level].get_const_ptr(), grid_solution[level]);
 			} break;
 
 			case MgOp::Restrict: {
@@ -55,12 +55,12 @@ void MgSolver::step() {
 				const auto formula = grid_residual_formula[level];
 
 				for (int i = 1; i < grid_size[level]; ++i) {
-					formula(i, grid_rhs[level], grid_solution[level], grid_residual[level]);
+					formula(i, grid_rhs[level].get_const_ptr(), grid_solution[level], grid_residual[level]);
 				}
 
 				for (int i = 0; i < grid_size[level+1]; ++i) grid_solution[level+1][i] = 0.0;
 
-				full_weight_restriction(grid_size[level], grid_residual[level], grid_rhs[level+1]);
+				full_weight_restriction(grid_size[level], grid_residual[level], grid_rhs[level+1].get_mutable_ptr());
 				++level;
 
 			} break;
@@ -86,7 +86,7 @@ void MgSolver::step() {
 
 			case MgOp::IterativeSolve: {
 				for (int i = 0; i < 300; ++i) {
-					smoother(grid_iteration_formula[level], grid_size[level], grid_rhs[level], grid_solution[level]);
+					smoother(grid_iteration_formula[level], grid_size[level], grid_rhs[level].get_const_ptr(), grid_solution[level]);
 				}
 
 			} break;
@@ -97,18 +97,11 @@ void MgSolver::step() {
 
 void MgSolver::build_level_to_memory_map() {
 	grid_solution.resize(maxlevels+1);
-	grid_rhs     .resize(maxlevels+1);
 	grid_residual.resize(maxlevels+1);
-
-	// @DESIGN: yet another asymmetry. The rhs at the top level is a `const double *`
-	// This pointer is returned by the pointer and it const so that solvers could not overwrite it, changing the problem
-	// But now all the rhs pointers are stored in the same vector, to maintain the abstraction I have to break part of it
-	//
-	// It's either this or make the vector store an std::variant<double*, const double*>
-	// This is not really an OOP fault
+	grid_rhs     .resize(maxlevels+1);
 
 	grid_solution[0] = u;
-	grid_rhs     [0] = rhs;
+	grid_rhs     [0] = PointerVariant<double>(rhs);
 	grid_residual[0] = residual_memory;
 
 	for (int level = 1; level < maxlevels+1; ++level) {
@@ -116,7 +109,7 @@ void MgSolver::build_level_to_memory_map() {
 
 		if (level == 1) {
 			grid_solution[level] = solution_memory;
-			grid_rhs     [level] = rhs_memory;
+			grid_rhs     [level] = PointerVariant<double>(rhs_memory);
 		}
 		else {
 			grid_solution[level] = grid_solution[level-1] + grid_size[level-1];

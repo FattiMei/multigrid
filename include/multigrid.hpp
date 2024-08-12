@@ -3,6 +3,7 @@
 
 
 #include "solvers.hpp"
+#include "pointer_variant.hpp"
 
 
 enum class MgOp {
@@ -30,7 +31,7 @@ class MgSolver : public IterativeSolver {
 
 		std::vector<int>     grid_size;
 		std::vector<double*> grid_solution;
-		std::vector<double*> grid_rhs;
+		std::vector<PointerVariant<double>> grid_rhs;
 		std::vector<double*> grid_residual;
 		std::vector<Update>  grid_iteration_formula;
 		std::vector<Update>  grid_residual_formula;

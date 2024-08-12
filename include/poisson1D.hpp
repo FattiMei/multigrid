@@ -21,7 +21,7 @@ class Poisson1D {
 
 			void	set_initial_approximation(double *u, InitializationStrategy strategy) const;
 			int	get_problem_size() const;
-			double*	get_rhs() const;
+		const	double*	get_rhs() const;
 		const	Update	get_iteration_formula(const int level = 0) const;
 		const	Update	get_residual_formula (const int level = 0) const;
 			double	get_residual_norm(const double u[]) const;
