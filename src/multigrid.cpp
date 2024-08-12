@@ -1,6 +1,7 @@
 #include "multigrid.hpp"
 #include <iostream>
 #include <numeric>
+#include <cassert>
 
 
 MgSolver::MgSolver(const Poisson1D &problem, const std::vector<MgOp> recipe_, InitializationStrategy strategy) : IterativeSolver(problem, strategy), recipe(recipe_) {
@@ -21,9 +22,14 @@ MgSolver::MgSolver(const Poisson1D &problem, const std::vector<MgOp> recipe_, In
 	//   1. It's desirable to do allocations in big chunks (improve heap locality)
 	//   2. There is memory already allocated (u comes from BaseSolver, rhs from Poisson1D)
 	//
-	// Once `grid_solution` and `grid_rhs` are maps from level to memory, they are tricky to compute
-	// but they isolate the rest of the program from this complexity
+	// grid_solution`, `grid_rhs` and `grid residuals` are maps from level to memory
+	// they are tricky to compute but isolate the rest of the program from this complexity
 	build_level_to_memory_map();
+
+	for (int level = 0; level < maxlevels+1; ++level) {
+		grid_iteration_formula.push_back(problem.get_iteration_formula(level));
+		grid_residual_formula.push_back(problem.get_residual_formula(level));
+	}
 }
 
 
@@ -35,7 +41,54 @@ MgSolver::~MgSolver() {
 
 
 void MgSolver::step() {
+	int level = 0;
 
+	for (const auto op : recipe) {
+		switch (op) {
+			case MgOp::Relax: {
+				smoother(grid_iteration_formula[level], grid_size[level], grid_rhs[level], grid_solution[level]);
+			} break;
+
+			case MgOp::Restrict: {
+				// still in doubt about whether to zero the error at the lower level
+				const auto formula = grid_residual_formula[level];
+
+				for (int i = 1; i < grid_size[level]; ++i) {
+					formula(i, grid_rhs[level], grid_solution[level], grid_residual[level]);
+				}
+
+				full_weight_restriction(grid_size[level], grid_residual[level], grid_rhs[level+1]);
+				++level;
+
+			} break;
+
+
+			case MgOp::Prolong: {
+				// using residual memory only as alias for the error correction
+				double* error_correction = grid_residual[level-1];
+
+				linear_prolongation(grid_size[level], grid_solution[level], error_correction);
+				--level;
+
+				for (int i = 1; i < grid_size[level]; ++i) {
+					grid_solution[level][i] += error_correction[i];
+				}
+			} break;
+
+
+			case MgOp::DirectSolve: {
+				assert(0 && "Not implemented");
+			} break;
+
+
+			case MgOp::IterativeSolve: {
+				for (int i = 0; i < 300; ++i) {
+					smoother(grid_iteration_formula[level], grid_size[level], grid_rhs[level], grid_solution[level]);
+				}
+
+			} break;
+		}
+	}
 }
 
 
@@ -144,9 +197,10 @@ bool analyze_cycle_recipe(const std::vector<MgOp> &recipe, int &nlevels) {
 
 
 bool compute_grid_sizes(const int n, const int maxlevels, std::vector<int> &grid_size) {
+	int m = n;
 	grid_size.push_back(n);
 
-	for (int level = 0, m = n; level < maxlevels; ++level) {
+	for (int level = 0; level < maxlevels; ++level) {
 		if ((m-1) % 2 == 0) {
 			m = 1 + (m-1)/2;
 

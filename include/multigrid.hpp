@@ -25,6 +25,7 @@ class MgSolver : public IterativeSolver {
 	protected:
 		void build_level_to_memory_map();
 		const std::vector<MgOp> recipe;
+		Smoother::GSeidel smoother;
 		int maxlevels;
 
 		std::vector<int>     grid_size;
@@ -32,6 +33,7 @@ class MgSolver : public IterativeSolver {
 		std::vector<double*> grid_rhs;
 		std::vector<double*> grid_residual;
 		std::vector<Update>  grid_iteration_formula;
+		std::vector<Update>  grid_residual_formula;
 
 		double* solution_memory;
 		double* rhs_memory;
