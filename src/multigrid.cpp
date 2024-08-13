@@ -223,7 +223,7 @@ bool compute_grid_sizes(const int n, const int maxlevels, std::vector<int> &grid
 }
 
 
-std::vector<MgOp> MgCycle::V(int maxdepth) {
+std::vector<MgOp> MgCycle::V(int maxdepth, bool solve) {
 	std::vector<MgOp> result;
 
 	for (int i = 0; i < maxdepth; ++i) {
@@ -231,8 +231,13 @@ std::vector<MgOp> MgCycle::V(int maxdepth) {
 		result.push_back(MgOp::Restrict);
 	}
 
-	// TODO: this will be a direct solve
-	result.push_back(MgOp::Relax);
+	if (solve) {
+		// TODO: this will be a direct solve
+		result.push_back(MgOp::IterativeSolve);
+	}
+	else {
+		result.push_back(MgOp::Relax);
+	}
 
 	for (int i = 0; i < maxdepth; ++i) {
 		result.push_back(MgOp::Prolong);

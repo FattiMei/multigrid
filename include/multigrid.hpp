@@ -65,7 +65,7 @@ bool compute_grid_sizes(const int n, const int maxlevels, std::vector<int> &grid
 
 
 namespace MgCycle {
-std::vector<MgOp> V(int maxdepth);
+std::vector<MgOp> V(int maxdepth, bool solve = false);
 }
 
 
