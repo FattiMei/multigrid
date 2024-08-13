@@ -4,7 +4,18 @@
 #include <cassert>
 
 
-MgSolver::MgSolver(const Poisson1D &problem, const std::vector<MgOp> recipe_, InitializationStrategy strategy) : IterativeSolver(problem, strategy), recipe(recipe_) {
+MgSolver::MgSolver(
+	const Poisson1D &problem,
+	const std::vector<MgOp> recipe_,
+	InitializationStrategy strategy,
+	RestrictionOperator restrict_,
+	ProlongationOperator prolong_
+) :
+	IterativeSolver(problem, strategy),
+	recipe(recipe_),
+	restrict(restrict_),
+	prolong(prolong_)
+{
 	if (not analyze_cycle_recipe(recipe, maxlevels)) {
 		// throws exception
 	}
@@ -60,7 +71,7 @@ void MgSolver::step() {
 				// zeroing the error is important!
 				for (int i = 0; i < grid_size[level+1]; ++i) grid_solution[level+1][i] = 0.0;
 
-				full_weight_restriction(grid_size[level], grid_residual[level], grid_rhs[level+1].get_mutable_ptr());
+				restrict(grid_size[level], grid_residual[level], grid_rhs[level+1].get_mutable_ptr());
 				++level;
 
 			} break;
@@ -70,7 +81,7 @@ void MgSolver::step() {
 				// using residual memory only as alias for the error correction
 				double* error_correction = grid_residual[level-1];
 
-				linear_prolongation(grid_size[level], grid_solution[level], error_correction);
+				prolong(grid_size[level], grid_solution[level], error_correction);
 				--level;
 
 				for (int i = 1; i < grid_size[level]; ++i) {
