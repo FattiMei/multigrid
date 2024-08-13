@@ -51,13 +51,13 @@ void MgSolver::step() {
 			} break;
 
 			case MgOp::Restrict: {
-				// still in doubt about whether to zero the error at the lower level
 				const auto formula = grid_residual_formula[level];
 
 				for (int i = 1; i < grid_size[level]; ++i) {
 					formula(i, grid_rhs[level].get_const_ptr(), grid_solution[level], grid_residual[level]);
 				}
 
+				// zeroing the error is important!
 				for (int i = 0; i < grid_size[level+1]; ++i) grid_solution[level+1][i] = 0.0;
 
 				full_weight_restriction(grid_size[level], grid_residual[level], grid_rhs[level+1].get_mutable_ptr());
@@ -209,4 +209,24 @@ bool compute_grid_sizes(const int n, const int maxlevels, std::vector<int> &grid
 	}
 
 	return true;
+}
+
+
+std::vector<MgOp> MgCycle::V(int maxdepth) {
+	std::vector<MgOp> result;
+
+	for (int i = 0; i < maxdepth; ++i) {
+		result.push_back(MgOp::Relax);
+		result.push_back(MgOp::Restrict);
+	}
+
+	// TODO: this will be a direct solve
+	result.push_back(MgOp::Relax);
+
+	for (int i = 0; i < maxdepth; ++i) {
+		result.push_back(MgOp::Prolong);
+		result.push_back(MgOp::Relax);
+	}
+
+	return result;
 }

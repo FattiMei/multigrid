@@ -52,4 +52,10 @@ bool analyze_cycle_recipe(const std::vector<MgOp> &recipe, int &nlevels);
 bool compute_grid_sizes(const int n, const int maxlevels, std::vector<int> &grid_size);
 
 
+namespace MgCycle {
+std::vector<MgOp> V(int maxdepth);
+}
+
+
+
 #endif

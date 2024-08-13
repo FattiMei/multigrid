@@ -14,16 +14,25 @@ convergence: build/convergence_history.o build/utils.o build/poisson1D.o build/s
 	$(CXX) -o $@ $^
 
 
+mgperf: build/multilevel_performance.o build/utils.o build/poisson1D.o build/smoothers.o build/solvers.o build/multigrid.o
+	$(CXX) -o $@ $^
+
+
 test_convergence: convergence
 	./$^ > convergence.out
 	python plot/convergence_history.py convergence.out
+
+
+test_mgperf: mgperf
+	./$^ > mgperf.out
+	python plot/convergence_history.py mgperf.out
 
 
 build/%.o: src/%.cpp
 	$(CXX) -c $(WARNINGS) $(INCLUDE) -o $@ $^
 
 
-build/convergence_history.o: test/convergence_history.cpp
+build/%.o: test/%.cpp
 	$(CXX) -c $(WARNINGS) $(INCLUDE) -o $@ $^
 
 
