@@ -3,7 +3,7 @@ WARNINGS   = -Wall -Wextra -Wpedantic
 INCLUDE    = -I ./include
 
 
-all: hello convergence
+all: hello convergence sparse
 
 
 hello: build/main.o build/utils.o build/poisson1D.o build/smoothers.o build/solvers.o

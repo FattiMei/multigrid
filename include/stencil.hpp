@@ -7,22 +7,19 @@
 #include <eigen3/Eigen/Sparse>
 
 
+// assumes a 1D grid with extremal points at boundary
 struct ThreePointStencilOperator {
 	public:
 		ThreePointStencilOperator(
-			const int problem_size,
-			const std::array<double, 3> weights,
-			const std::set<int> boundary_set
-		) : n(problem_size) , stencil(weights) , boundary(boundary_set) {};
+			const int n,
+			const std::array<double, 3> weights
+		) : problem_size(n) , stencil(weights) {};
 
 
-		Eigen::SparseMatrix<double> build_sparse_repr();
+		Eigen::SparseMatrix<double> build_sparse_repr() const;
 
-
-	private:
-		const int n;
+		const int problem_size;
 		const std::array<double,3> stencil;
-		const std::set<int>        boundary;
 };
 
 
