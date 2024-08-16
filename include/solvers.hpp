@@ -60,4 +60,16 @@ class SmootherSolver : public IterativeSolver {
 };
 
 
+class EigenDirectSolver {
+	public:
+		EigenDirectSolver(Problem *problem);
+		void solve();
+
+
+	private:
+		Problem* problem;
+		double* rhs;
+};
+
+
 #endif

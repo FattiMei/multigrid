@@ -8,6 +8,30 @@
 #include <eigen3/Eigen/Sparse>
 
 
+class DiscreteOperator {
+	public:
+		DiscreteOperator(const int nodes) : n(nodes) {};
+		virtual Eigen::SparseMatrix<double> get_sparse_repr() = 0;
+
+
+	protected:
+		const int n;
+};
+
+
+// assumes a 1D grid with extremal points at boundary
+class ThreePointStencil : public DiscreteOperator {
+	public:
+		ThreePointStencil(const int n, const std::array<double,3> weights);
+
+		Eigen::SparseMatrix<double> get_sparse_repr() override;
+
+
+	private:
+		const std::array<double,3> stencil;
+};
+
+
 struct SparseOperator {
 	public:
 		SparseOperator(

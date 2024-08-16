@@ -6,8 +6,8 @@ INCLUDE    = -I ./include
 all: hello convergence sparse
 
 
-hello: build/main.o build/utils.o build/poisson1D.o build/smoothers.o build/solvers.o
-	$(CXX) -o $@ $^
+hello:
+	$(CXX) $(INCLUDE) -o $@ src/main.cpp src/poisson.cpp src/utils.cpp src/operator.cpp
 
 
 convergence: build/convergence_history.o build/utils.o build/poisson1D.o build/smoothers.o build/solvers.o build/multigrid.o
