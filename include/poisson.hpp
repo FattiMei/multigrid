@@ -3,7 +3,6 @@
 
 
 #include "problem.hpp"
-#include <vector>
 
 
 class IsotropicPoisson1D : public Problem {
@@ -17,12 +16,11 @@ class IsotropicPoisson1D : public Problem {
 		);
 		~IsotropicPoisson1D() = default;
 
-		DiscreteOperator* get_discrete_operator(const int level) override;
+		DiscreteOperator* get_discrete_operator(const int level) const override;
 
 
 	private:
 		const double h;
-		std::vector<double> rhs;
 };
 
 

@@ -11,7 +11,7 @@ ThreePointStencil::ThreePointStencil(
 {}
 
 
-Eigen::SparseMatrix<double> ThreePointStencil::get_sparse_repr() {
+Eigen::SparseMatrix<double> ThreePointStencil::get_sparse_repr() const {
 	Eigen::SparseMatrix<double> A(n,n);
 	A.reserve(Eigen::VectorXi::Constant(n, 3));
 

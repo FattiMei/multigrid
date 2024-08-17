@@ -1,6 +1,9 @@
 #include "solvers.hpp"
+#include "operator.hpp"
+#include <iostream>
 
 
+/*
 BaseSolver::BaseSolver(const Poisson1D &problem_) : problem(problem_), n(problem.get_problem_size()), rhs(problem.get_rhs()) {
 	u = new double[n];
 }
@@ -34,4 +37,36 @@ void IterativeSolver::solve(const double tol, const int maxiter) {
 			}
 		}
 	}
+}
+*/
+
+
+EigenDirectSolver::EigenDirectSolver(const Problem *p) :
+	problem(p),
+	op(problem->get_discrete_operator()),
+	rhs(problem->get_rhs())
+{
+	A = op->get_sparse_repr();
+	solver.compute(A);
+
+	if (solver.info() != Eigen::Success) {
+		std::cerr << "EigenDirectSolver has failed to factorize the operator" << std::endl;
+	}
+}
+
+
+EigenDirectSolver::~EigenDirectSolver() {
+	delete op;
+}
+
+
+void EigenDirectSolver::solve() {
+	Eigen::Map<const Eigen::VectorXd> b(rhs, problem->get_size());
+
+	x = solver.solve(b);
+}
+
+
+double EigenDirectSolver::get_residual_norm() const {
+	return op->compute_residual_norm(rhs, x.data());
 }

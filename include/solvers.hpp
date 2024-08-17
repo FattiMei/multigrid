@@ -2,11 +2,12 @@
 #define __SOLVERS_HPP__
 
 
-#include "poisson1D.hpp"
-#include "smoothers.hpp"
 #include "problem.hpp"
+#include <eigen3/Eigen/Sparse>
+#include <eigen3/Eigen/SparseLU>
 
 
+/*
 enum class SolverStatus {
 	OK,
 	MAXIT
@@ -59,17 +60,27 @@ class SmootherSolver : public IterativeSolver {
 		const Update formula;
 		Smoother smoother;
 };
+*/
 
 
 class EigenDirectSolver {
 	public:
-		EigenDirectSolver(Problem *problem);
+		EigenDirectSolver(const Problem *problem);
+		~EigenDirectSolver();
+
 		void solve();
+		double get_residual_norm() const ;
 
 
 	private:
-		Problem* problem;
-		double* rhs;
+		const Problem* problem;
+		const DiscreteOperator* op;
+
+		Eigen::SparseMatrix<double> A;
+		Eigen::SparseLU<Eigen::SparseMatrix<double>> solver;
+
+		const double* rhs;
+		Eigen::VectorXd x;
 };
 
 

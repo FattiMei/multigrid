@@ -3,7 +3,11 @@ WARNINGS   = -Wall -Wextra -Wpedantic
 INCLUDE    = -I ./include
 
 
-all: hello convergence sparse
+all: test_stress_direct
+
+
+test_stress_direct:
+	$(CXX) $(INCLUDE) -O1 -o prova test/test_stress_direct.cpp src/utils.cpp src/poisson.cpp src/operator.cpp src/solvers.cpp
 
 
 hello:

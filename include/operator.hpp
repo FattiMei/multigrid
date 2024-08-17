@@ -11,8 +11,9 @@
 class DiscreteOperator {
 	public:
 		DiscreteOperator(const int nodes) : n(nodes) {};
+		virtual ~DiscreteOperator() = default;
 
-		virtual Eigen::SparseMatrix<double> get_sparse_repr() = 0;
+		virtual Eigen::SparseMatrix<double> get_sparse_repr() const = 0;
 		virtual double compute_residual_norm(const double b[], const double u[]) const = 0;
 
 
@@ -26,7 +27,7 @@ class ThreePointStencil : public DiscreteOperator {
 	public:
 		ThreePointStencil(const int n, const std::array<double,3> weights);
 
-		Eigen::SparseMatrix<double> get_sparse_repr() override;
+		Eigen::SparseMatrix<double> get_sparse_repr() const override;
 		double compute_residual_norm(const double b[], const double u[]) const override;
 
 

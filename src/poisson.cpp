@@ -11,8 +11,7 @@ IsotropicPoisson1D::IsotropicPoisson1D(
 	const std::pair<double,double> boundary
 ) :
 	Problem(n),
-	h((sup - inf) / (n - 1.0)),
-	rhs(n)
+	h((sup - inf) / (n - 1.0))
 {
 	rhs[0] = boundary.first;
 
@@ -24,7 +23,7 @@ IsotropicPoisson1D::IsotropicPoisson1D(
 }
 
 
-DiscreteOperator* IsotropicPoisson1D::get_discrete_operator(const int level) {
+DiscreteOperator* IsotropicPoisson1D::get_discrete_operator(const int level) const {
 	const double h = std::pow(2.0, level) * this->h;
 
 	return new ThreePointStencil(
