@@ -7,8 +7,55 @@ ThreePointStencil::ThreePointStencil(
 	const std::array<double,3> weights
 ) :
 	DiscreteOperator(n),
-	stencil(weights)
+	stencil(weights),
+	local(n)
 {}
+
+
+// there is no silver bullet
+void ThreePointStencil::relax(const double b[], double u[], UpdateStrategy strategy) {
+	switch(strategy) {
+		// double sweep, Jersey style
+		case UpdateStrategy::Jacobi: {
+			local[0] = b[0];
+
+			for (int i = 1; i < n-1; ++i) {
+				local[i] = (b[i] - stencil[0] * u[i-1] - stencil[2] * u[i+1]) / stencil[1];
+			}
+
+			local[n-1] = b[n-1];
+
+			for (int i = 1; i < n-1; ++i) {
+				u[i] = (b[i] - stencil[0] * local[i-1] - stencil[2] * local[i+1]) / stencil[1];
+			}
+
+		} break;
+
+		case UpdateStrategy::GaussSeidel: {
+			u[0] = b[0];
+
+			for (int i = 1; i < n-1; ++i) {
+				u[i] = (b[i] - stencil[0] * u[i-1] - stencil[2] * u[i+1]) / stencil[1];
+			}
+
+			u[n-1] = b[n-1];
+		} break;
+
+		case UpdateStrategy::RedBlack: {
+			u[0] = b[0];
+
+			for (int i = 1; i < n-1; i += 2) {
+				u[i] = (b[i] - stencil[0] * u[i-1] - stencil[2] * u[i+1]) / stencil[1];
+			}
+
+			for (int i = 2; i < n-1; i += 2) {
+				u[i] = (b[i] - stencil[0] * u[i-1] - stencil[2] * u[i+1]) / stencil[1];
+			}
+
+			u[n-1] = b[n-1];
+		} break;
+	}
+}
 
 
 Eigen::SparseMatrix<double> ThreePointStencil::get_sparse_repr() const {

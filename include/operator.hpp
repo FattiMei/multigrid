@@ -3,6 +3,14 @@
 
 
 #include <eigen3/Eigen/Sparse>
+#include <vector>
+
+
+enum class UpdateStrategy {
+	Jacobi,
+	GaussSeidel,
+	RedBlack
+};
 
 
 class DiscreteOperator {
@@ -10,6 +18,7 @@ class DiscreteOperator {
 		DiscreteOperator(const int nodes) : n(nodes) {};
 		virtual ~DiscreteOperator() = default;
 
+		virtual void relax(const double b[], double u[], UpdateStrategy strategy) = 0;
 		virtual Eigen::SparseMatrix<double> get_sparse_repr() const = 0;
 		virtual double compute_residual_norm(const double b[], const double u[]) const = 0;
 
@@ -24,12 +33,14 @@ class ThreePointStencil : public DiscreteOperator {
 	public:
 		ThreePointStencil(const int n, const std::array<double,3> weights);
 
+		void relax(const double b[], double u[], UpdateStrategy strategy) override;
 		Eigen::SparseMatrix<double> get_sparse_repr() const override;
 		double compute_residual_norm(const double b[], const double u[]) const override;
 
 
 	private:
 		const std::array<double,3> stencil;
+		std::vector<double> local;
 };
 
 
