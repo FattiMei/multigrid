@@ -14,8 +14,9 @@ test_compute_residual: build/test_compute_residual.o build/poisson.o build/opera
 	$(CXX) -o $@ $^
 
 
-test_eigen_interop: build/test_eigen_interop.o
+test_eigen_interop: build/test_eigen_interop.o build/utils.o
 	$(CXX) -o $@ $^
+	./$@
 
 
 test_sparse_repr: build/test_sparse_repr.o build/poisson.o build/operator.o build/utils.o

@@ -1,7 +1,11 @@
 build/
 */__pycache__
 analysis/.ipynb_checkpoints/
-hello
-convergence
+*.out
+*.csv
+test_compute_residual
+test_eigen_interop
+test_sparse_repr
+test_stress_direct
 presentation.odp
 .~lock.presentation.odp#
