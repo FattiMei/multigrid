@@ -16,7 +16,7 @@ class IsotropicPoisson1D : public Problem {
 		);
 		~IsotropicPoisson1D() = default;
 
-		DiscreteOperator* get_discrete_operator(const int level) const override;
+		DiscreteOperator* get_discrete_operator(const int level = 0) const override;
 
 
 	private:

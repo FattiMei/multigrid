@@ -28,6 +28,6 @@ DiscreteOperator* IsotropicPoisson1D::get_discrete_operator(const int level) con
 
 	return new ThreePointStencil(
 		n,
-		{-1.0 / h*h, 2.0 / h*h, -1.0 / h*h}
+		{-1.0 / (h*h), 2.0 / (h*h), -1.0 / (h*h)}
 	);
 };
