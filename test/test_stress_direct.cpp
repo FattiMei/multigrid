@@ -10,7 +10,7 @@ int main() {
 	const std::function<double(double)> f = [](double x) {return x;};
 	const std::pair<double,double> boundary{0.0, 0.0};
 
-	std::cout << "n,residual,wall_time[ms]" << std::endl;
+	std::cout << "n,residual,wall time" << std::endl;
 
 	for (int n = 10; n <= 1'000'000; n *= 10) {
 		const IsotropicPoisson1D problem(inf, sup, n, f, boundary);
@@ -20,7 +20,13 @@ int main() {
 		solver.solve();
 		const auto stop = std::chrono::high_resolution_clock::now();
 
-		std::cout << n << ',' << solver.get_residual_norm() << ',' << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() << std::endl;
+		std::cout
+			<< n
+			<< ','
+			<< solver.get_residual_norm()
+			<< ','
+			<< std::chrono::duration<double, std::milli>(stop-start)
+			<< std::endl;
 	}
 
 	return 0;
