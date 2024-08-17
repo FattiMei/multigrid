@@ -3,51 +3,27 @@ WARNINGS   = -Wall -Wextra -Wpedantic
 INCLUDE    = -I ./include
 
 
-all: test_stress_direct
+test_src   = test_compute_residual.cpp test_eigen_interop.cpp test_sparse_repr.cpp test_stress_direct.cpp
+targets   += $(patsubst %.cpp,%,$(test_src))
 
 
-test_stress_direct:
-	$(CXX) $(INCLUDE) -O1 -o prova test/test_stress_direct.cpp src/utils.cpp src/poisson.cpp src/operator.cpp src/solvers.cpp
+all: $(targets)
 
 
-hello:
-	$(CXX) $(INCLUDE) -o $@ src/main.cpp src/poisson.cpp src/utils.cpp src/operator.cpp
-
-
-convergence: build/convergence_history.o build/utils.o build/poisson1D.o build/smoothers.o build/solvers.o build/multigrid.o
+test_compute_residual: build/test_compute_residual.o build/poisson.o build/operator.o build/utils.o
 	$(CXX) -o $@ $^
 
 
-mgperf: build/multilevel_performance.o build/utils.o build/poisson1D.o build/smoothers.o build/solvers.o build/multigrid.o
+test_eigen_interop: build/test_eigen_interop.o
 	$(CXX) -o $@ $^
 
 
-operators: build/critical_operators.o build/utils.o build/poisson1D.o build/smoothers.o build/solvers.o build/multigrid.o
+test_sparse_repr: build/test_sparse_repr.o build/poisson.o build/operator.o build/utils.o
 	$(CXX) -o $@ $^
 
 
-sparse: build/test_sparse.o build/stencil.o
+test_stress_direct: build/test_stress_direct.o build/poisson.o build/operator.o build/solvers.o build/utils.o
 	$(CXX) -o $@ $^
-
-
-test_convergence: convergence
-	./$^ > convergence.out
-	python plot/convergence_history.py convergence.out
-
-
-test_mgperf: mgperf
-	./$^ > mgperf.out
-	python plot/convergence_history.py mgperf.out
-
-
-test_operators: operators
-	./$^ > operators.out
-	python plot/convergence_history.py operators.out
-
-
-test_sparse: sparse
-	./$^
-
 
 
 build/%.o: src/%.cpp

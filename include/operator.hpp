@@ -2,9 +2,6 @@
 #define __OPERATOR_HPP__
 
 
-#include <set>
-#include <array>
-#include <concepts>
 #include <eigen3/Eigen/Sparse>
 
 
