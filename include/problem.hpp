@@ -10,6 +10,7 @@ class Problem {
 		Problem(const int nodes) : n(nodes) {};
 		virtual ~Problem() = default;
 
+		int size() { return n; };
 		virtual DiscreteOperator* get_discrete_operator(const int level = 0) = 0;
 
 

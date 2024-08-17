@@ -1,4 +1,5 @@
 #include "operator.hpp"
+#include <cmath>
 
 
 ThreePointStencil::ThreePointStencil(
@@ -24,4 +25,23 @@ Eigen::SparseMatrix<double> ThreePointStencil::get_sparse_repr() {
 
 	A.makeCompressed();
 	return A;
+}
+
+
+double ThreePointStencil::compute_residual_norm(const double b[], const double u[]) const {
+	double acc = 0.0;
+	double diff;
+
+	diff = b[0] - u[0];
+	acc += diff * diff;
+
+	for (int i = 1; i < n-1; ++i) {
+		diff = b[i] - u[i-1] * stencil[0] - u[i] * stencil[1] - u[i+1] * stencil[2];
+		acc += diff * diff;
+	}
+
+	diff = b[n-1] - u[n-1];
+	acc += diff * diff;
+
+	return std::sqrt(acc);
 }

@@ -11,9 +11,9 @@ IsotropicPoisson1D::IsotropicPoisson1D(
 	const std::pair<double,double> boundary
 ) :
 	Problem(n),
-	h((sup - inf) / (n - 1.0))
+	h((sup - inf) / (n - 1.0)),
+	rhs(n)
 {
-	rhs    = new double[n];
 	rhs[0] = boundary.first;
 
 	for (int i = 1; i < n-1; ++i) {

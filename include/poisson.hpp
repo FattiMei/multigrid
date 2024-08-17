@@ -3,6 +3,7 @@
 
 
 #include "problem.hpp"
+#include <vector>
 
 
 class IsotropicPoisson1D : public Problem {
@@ -21,7 +22,7 @@ class IsotropicPoisson1D : public Problem {
 
 	private:
 		const double h;
-		double* rhs;
+		std::vector<double> rhs;
 };
 
 

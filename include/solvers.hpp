@@ -4,6 +4,7 @@
 
 #include "poisson1D.hpp"
 #include "smoothers.hpp"
+#include "problem.hpp"
 
 
 enum class SolverStatus {
