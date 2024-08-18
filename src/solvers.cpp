@@ -41,6 +41,24 @@ void IterativeSolver::solve(const double tol, const int maxiter) {
 */
 
 
+BaseSolver::BaseSolver(const Problem *p) :
+	problem(p),
+	op(p->get_discrete_operator()),
+	u(p->get_size()),
+	rhs(p->get_rhs())
+{}
+
+
+double BaseSolver::get_residual_norm() const {
+	return op->compute_residual_norm(rhs, u.data());
+}
+
+
+BaseSolver::~BaseSolver() {
+	delete op;
+}
+
+
 EigenDirectSolver::EigenDirectSolver(const Problem *p) :
 	problem(p),
 	op(problem->get_discrete_operator()),

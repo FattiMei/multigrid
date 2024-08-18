@@ -63,6 +63,23 @@ class SmootherSolver : public IterativeSolver {
 */
 
 
+class BaseSolver {
+	public:
+		BaseSolver(const Problem *problem);
+		~BaseSolver();
+
+		double get_residual_norm() const;
+
+
+	protected:
+		const Problem* problem;
+		const DiscreteOperator* op;
+
+		std::vector<double> u;
+		const double* rhs;
+};
+
+
 // TODO: add also Cholesky solver
 class EigenDirectSolver {
 	public:
