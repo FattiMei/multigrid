@@ -44,6 +44,7 @@ void IterativeSolver::solve(const double tol, const int maxiter) {
 EigenDirectSolver::EigenDirectSolver(const Problem *p) :
 	problem(p),
 	op(problem->get_discrete_operator()),
+	u(problem->get_size()),
 	rhs(problem->get_rhs())
 {
 	A = op->get_sparse_repr();
@@ -62,11 +63,12 @@ EigenDirectSolver::~EigenDirectSolver() {
 
 void EigenDirectSolver::solve() {
 	Eigen::Map<const Eigen::VectorXd> b(rhs, problem->get_size());
+	Eigen::Map<Eigen::VectorXd> tmp(u.data(), u.size());
 
-	x = solver.solve(b);
+	tmp = solver.solve(b);
 }
 
 
 double EigenDirectSolver::get_residual_norm() const {
-	return op->compute_residual_norm(rhs, x.data());
+	return op->compute_residual_norm(rhs, u.data());
 }

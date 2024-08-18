@@ -63,6 +63,7 @@ class SmootherSolver : public IterativeSolver {
 */
 
 
+// TODO: add also Cholesky solver
 class EigenDirectSolver {
 	public:
 		EigenDirectSolver(const Problem *problem);
@@ -79,8 +80,8 @@ class EigenDirectSolver {
 		Eigen::SparseMatrix<double> A;
 		Eigen::SparseLU<Eigen::SparseMatrix<double>> solver;
 
+		std::vector<double> u;
 		const double* rhs;
-		Eigen::VectorXd x;
 };
 
 
