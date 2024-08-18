@@ -6,7 +6,7 @@
 template <class EigenSparseSolver>
 class DirectSolver : public BaseSolver {
 	public:
-		EigenDirectSolver(const Problem *problem) : BaseSolver(problem) {
+		DirectSolver(const Problem *problem) : BaseSolver(problem) {
 			solver.compute(op->get_sparse_repr());
 			if (solver.info() != Eigen::Success) {
 				std::cerr << "EigenDirectSolver has failed to factorize the operator" << std::endl;

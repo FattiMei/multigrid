@@ -14,12 +14,9 @@ if __name__ == '__main__':
     plt.title("Stress test for direct methods")
     plt.xlabel(columns[0])
     plt.ylabel("$||r||$")
-    plt.loglog(df[columns[0]], df[columns[1]])
-    plt.show()
 
-    plt.figure(2)
-    plt.title("Wall time for direct methods")
-    plt.xlabel(columns[0])
-    plt.ylabel(columns[2])
-    plt.loglog(df[columns[0]], df[columns[2]])
+    for i in range(1,len(columns)):
+        plt.loglog(df[columns[0]], df[columns[i]], label=columns[i])
+
+    plt.legend()
     plt.show()

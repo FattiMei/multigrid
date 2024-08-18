@@ -1,7 +1,8 @@
 #include <iostream>
-#include <chrono>
 #include "poisson.hpp"
-#include "solvers.hpp"
+#include "direct.hpp"
+#include <eigen3/Eigen/SparseCholesky>
+#include <eigen3/Eigen/SparseLU>
 
 
 int main() {
@@ -10,22 +11,23 @@ int main() {
 	const std::function<double(double)> f = [](double x) {return x;};
 	const std::pair<double,double> boundary{0.0, 0.0};
 
-	std::cout << "n,residual,wall time" << std::endl;
+	std::cout << "n,SimplicialLDLT,SparseLU" << std::endl;
 
 	for (int n = 10; n <= 1'000'000; n *= 10) {
 		const IsotropicPoisson1D problem(inf, sup, n, f, boundary);
 
-		const auto start = std::chrono::high_resolution_clock::now();
-		EigenDirectSolver solver(&problem);
-		solver.solve();
-		const auto stop = std::chrono::high_resolution_clock::now();
+		DirectSolver<Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>> ldlt(&problem);
+		DirectSolver<Eigen::SparseLU<Eigen::SparseMatrix<double>>>       splu(&problem);
+
+		ldlt.solve();
+		splu.solve();
 
 		std::cout
 			<< n
 			<< ','
-			<< solver.get_residual_norm()
+			<< ldlt.get_residual_norm()
 			<< ','
-			<< std::chrono::duration<double, std::milli>(stop-start)
+			<< splu.get_residual_norm()
 			<< std::endl;
 	}
 
