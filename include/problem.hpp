@@ -6,6 +6,12 @@
 #include <vector>
 
 
+enum class InitializationStrategy {
+	Zeros,
+	Lerp
+};
+
+
 class Problem {
 	public:
 		Problem(const int nodes) : n(nodes), rhs(nodes) {};
