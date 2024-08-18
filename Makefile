@@ -1,14 +1,22 @@
-CXX        = g++-13 -std=c++20
-WARNINGS   = -Wall -Wextra -Wpedantic
-INCLUDE    = -I ./include
-OPT        = -O2
+CXX         = g++-13 -std=c++20
+WARNINGS    = -Wall -Wextra -Wpedantic
+INCLUDE     = -I ./include
+OPT         = -O2
 
 
-test_src   = test_compute_residual.cpp test_eigen_interop.cpp test_sparse_repr.cpp test_stress_direct.cpp
-targets   += $(patsubst %.cpp,%,$(test_src))
+
+test_src    = test_compute_residual.cpp test_eigen_interop.cpp test_sparse_repr.cpp test_stress_direct.cpp
+example_src = example_smoother_comparison.cpp
+targets    += $(patsubst %.cpp,%,$(test_src))
+targets    += $(patsubst %.cpp,%,$(example_src))
 
 
 all: $(targets)
+
+
+example_smoother_comparison: build/example_smoother_comparison.o build/poisson.o build/operator.o build/solvers.o build/utils.o
+	$(CXX) -o $@ $^
+	./$@
 
 
 test_compute_residual: build/test_compute_residual.o build/poisson.o build/operator.o build/utils.o
@@ -39,6 +47,10 @@ build/%.o: src/%.cpp
 
 
 build/%.o: test/%.cpp
+	$(CXX) -c $(WARNINGS) $(OPT) $(INCLUDE) -o $@ $^
+
+
+build/%.o: examples/%.cpp
 	$(CXX) -c $(WARNINGS) $(OPT) $(INCLUDE) -o $@ $^
 
 

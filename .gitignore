@@ -3,6 +3,7 @@ build/
 analysis/.ipynb_checkpoints/
 *.out
 *.csv
+example_smoothers_comparison
 test_compute_residual
 test_eigen_interop
 test_sparse_repr

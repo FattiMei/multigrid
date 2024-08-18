@@ -14,7 +14,7 @@ enum class SolverStatus {
 class BaseSolver {
 	public:
 		BaseSolver(const Problem *problem);
-		~BaseSolver();
+		virtual ~BaseSolver();
 
 		double get_residual_norm() const;
 
