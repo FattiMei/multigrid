@@ -7,8 +7,7 @@ ThreePointStencil::ThreePointStencil(
 	const std::array<double,3> weights
 ) :
 	DiscreteOperator(n),
-	stencil(weights),
-	local(n)
+	stencil(weights)
 {}
 
 
@@ -17,6 +16,8 @@ void ThreePointStencil::relax(const double b[], double u[], UpdateStrategy strat
 	switch(strategy) {
 		// double sweep, Jersey style
 		case UpdateStrategy::Jacobi: {
+			if (local.size() < static_cast<size_t>(n)) local.resize(n);
+
 			local[0] = b[0];
 
 			for (int i = 1; i < n-1; ++i) {
@@ -72,6 +73,17 @@ Eigen::SparseMatrix<double> ThreePointStencil::get_sparse_repr() const {
 
 	A.makeCompressed();
 	return A;
+}
+
+
+void ThreePointStencil::compute_residual(const double b[], const double u[], double r[]) const {
+	r[0] = b[0] - u[0];
+
+	for (int i = 1; i < n-1; ++i) {
+		r[i] = b[i] - stencil[0] * u[i-1] - stencil[1] * u[i] - stencil[2] * u[i+1];
+	}
+
+	r[n-1] = b[n-1] - u[n-1];
 }
 
 

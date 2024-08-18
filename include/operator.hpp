@@ -20,6 +20,7 @@ class DiscreteOperator {
 
 		virtual void relax(const double b[], double u[], UpdateStrategy strategy) = 0;
 		virtual Eigen::SparseMatrix<double> get_sparse_repr() const = 0;
+		virtual void   compute_residual     (const double b[], const double u[], double r[]) const = 0;
 		virtual double compute_residual_norm(const double b[], const double u[]) const = 0;
 
 
@@ -35,6 +36,7 @@ class ThreePointStencil : public DiscreteOperator {
 
 		void relax(const double b[], double u[], UpdateStrategy strategy) override;
 		Eigen::SparseMatrix<double> get_sparse_repr() const override;
+		void   compute_residual     (const double b[], const double u[], double r[]) const override;
 		double compute_residual_norm(const double b[], const double u[]) const override;
 
 
