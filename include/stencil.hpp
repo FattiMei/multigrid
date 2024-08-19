@@ -25,6 +25,8 @@ class ThreePointStencil : public DiscreteOperator {
 // assumes a 1D grid with extremal points topologically connected
 class ThreePointPeriodicStencil : public ThreePointStencil {
 	public:
+		ThreePointPeriodicStencil(const int n, const std::array<double,3> weights) : ThreePointStencil(n, weights) {};
+
 		void relax(const double b[], double u[], UpdateStrategy strategy) override;
 		Eigen::SparseMatrix<double> get_sparse_repr() const override;
 		void   compute_residual     (const double b[], const double u[], double r[]) const override;

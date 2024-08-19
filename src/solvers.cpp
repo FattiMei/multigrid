@@ -16,6 +16,11 @@ double BaseSolver::get_residual_norm() const {
 }
 
 
+const std::vector<double>& BaseSolver::get_solution() const {
+	return u;
+}
+
+
 BaseSolver::~BaseSolver() {
 	delete op;
 }

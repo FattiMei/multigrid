@@ -17,6 +17,7 @@ class BaseSolver {
 		virtual ~BaseSolver();
 
 		double get_residual_norm() const;
+		const std::vector<double>& get_solution() const;
 
 
 	protected:
