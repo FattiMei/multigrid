@@ -1,6 +1,7 @@
 #include "poisson.hpp"
 #include "utils.hpp"
 #include <cmath>
+#include <stdexcept>
 
 
 IsotropicPoisson1D::IsotropicPoisson1D(
@@ -25,9 +26,18 @@ IsotropicPoisson1D::IsotropicPoisson1D(
 
 DiscreteOperator* IsotropicPoisson1D::get_discrete_operator(const int level) const {
 	const double h = std::pow(2.0, level) * this->h;
+	int m = n;
+
+	for (int i = 0; i < level; ++i) {
+		if ((m-1) % 2 != 0) {
+			throw std::invalid_argument("Can't build restricted operator at this level");
+		}
+
+		m = 1 + (m-1) / 2;
+	}
 
 	return new ThreePointStencil(
-		n,
+		m,
 		{-1.0 / (h*h), 2.0 / (h*h), -1.0 / (h*h)}
 	);
 };
