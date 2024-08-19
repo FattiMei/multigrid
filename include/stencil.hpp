@@ -2,24 +2,23 @@
 #define __STENCIL_HPP__
 
 
-#include <array>
-#include <set>
-#include <eigen3/Eigen/Sparse>
+#include "operator.hpp"
 
 
 // assumes a 1D grid with extremal points at boundary
-struct ThreePointStencilOperator {
+class ThreePointStencil : public DiscreteOperator {
 	public:
-		ThreePointStencilOperator(
-			const int n,
-			const std::array<double, 3> weights
-		) : problem_size(n) , stencil(weights) {};
+		ThreePointStencil(const int n, const std::array<double,3> weights);
+
+		void relax(const double b[], double u[], UpdateStrategy strategy) override;
+		Eigen::SparseMatrix<double> get_sparse_repr() const override;
+		void   compute_residual     (const double b[], const double u[], double r[]) const override;
+		double compute_residual_norm(const double b[], const double u[]) const override;
 
 
-		Eigen::SparseMatrix<double> build_sparse_repr() const;
-
-		const int problem_size;
+	private:
 		const std::array<double,3> stencil;
+		std::vector<double> local;
 };
 
 

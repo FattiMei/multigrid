@@ -1,4 +1,5 @@
 #include "poisson.hpp"
+#include "stencil.hpp"
 #include "utils.hpp"
 #include <cmath>
 #include <stdexcept>
