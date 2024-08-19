@@ -8,7 +8,7 @@ int main() {
 		0.0,
 		1.0,
 		5,
-		[](double x){ return 0.0; },
+		[](double x){ (void) x; return 0.0; },
 		{0.0, 0.0}
 	);
 
