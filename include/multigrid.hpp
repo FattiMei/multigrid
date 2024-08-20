@@ -3,7 +3,7 @@
 
 
 #include "solvers.hpp"
-#include "pointer_variant.hpp"
+#include "vpointer.hpp"
 
 
 enum class MgOp {
@@ -27,11 +27,12 @@ void linear_prolongation    (const int m, const double src[], double dest[]);
 class MgSolver : public IterativeSolver {
 	public:
 		MgSolver(
-			const Poisson1D &problem,
-			const std::vector<MgOp> recipe,
-			InitializationStrategy strategy,
-			RestrictionOperator restrict = full_weight_restriction,
-			ProlongationOperator prolong = linear_prolongation
+			const Problem*			problem,
+			const std::vector<MgOp>		cycle_spec,
+			const InitializationStrategy	strategy,
+			const UpdateStrategy		smoother,
+			RestrictionOperator		restrict = full_weight_restriction,
+			ProlongationOperator		prolong  = linear_prolongation
 		);
 		~MgSolver();
 
@@ -40,19 +41,20 @@ class MgSolver : public IterativeSolver {
 
 	protected:
 		void build_level_to_memory_map();
-		const std::vector<MgOp> recipe;
-		Smoother::GSeidel smoother;
-		int maxlevels;
 
-		RestrictionOperator  restrict;
-		ProlongationOperator prolong;
+		const int		n;
+		const std::vector<MgOp> recipe;
+		const UpdateStrategy 	smoother;
+		const int		maxlevels;
+
+		const RestrictionOperator  restrict;
+		const ProlongationOperator prolong;
 
 		std::vector<int>     grid_size;
 		std::vector<double*> grid_solution;
 		std::vector<PointerVariant<double>> grid_rhs;
 		std::vector<double*> grid_residual;
-		std::vector<Update>  grid_iteration_formula;
-		std::vector<Update>  grid_residual_formula;
+		std::vector<DiscreteOperator*>  grid_operator;
 
 		double* solution_memory;
 		double* rhs_memory;
@@ -60,14 +62,16 @@ class MgSolver : public IterativeSolver {
 };
 
 
-bool analyze_cycle_recipe(const std::vector<MgOp> &recipe, int &nlevels);
+int analyze_cycle_recipe(const std::vector<MgOp> &recipe);
+
+// probably needs to be specialized for each problem
+std::vector<int> compute_grid_sizes(const int n, const int maxdepth);
 bool compute_grid_sizes(const int n, const int maxlevels, std::vector<int> &grid_size);
 
 
 namespace MgCycle {
 std::vector<MgOp> V(int maxdepth, bool solve = false);
 }
-
 
 
 #endif

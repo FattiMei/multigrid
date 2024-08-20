@@ -6,7 +6,7 @@ OPT         = -O2
 
 
 test_src    = test_compute_residual.cpp test_eigen_interop.cpp test_sparse_repr.cpp test_stress_direct.cpp
-example_src = example_smoother_comparison.cpp example_forced_circuit.cpp
+example_src = example_smoother_comparison.cpp example_forced_circuit.cpp example_multilevel_performance.cpp
 targets    += $(patsubst %.cpp,%,$(test_src))
 targets    += $(patsubst %.cpp,%,$(example_src))
 
@@ -16,12 +16,14 @@ all: $(targets)
 
 example_smoother_comparison: build/example_smoother_comparison.o build/poisson.o build/stencil.o build/solvers.o build/utils.o
 	$(CXX) -o $@ $^
-	./$@
 
 
 example_forced_circuit: build/example_forced_circuit.o build/circuit.o build/solvers.o build/stencil.o build/utils.o
 	$(CXX) -o $@ $^
 
+
+example_multilevel_performance: build/example_multilevel_performance.o build/poisson.o build/solvers.o build/stencil.o build/multigrid.o build/utils.o
+	$(CXX) -o $@ $^
 
 test_compute_residual: build/test_compute_residual.o build/poisson.o build/stencil.o build/utils.o
 	$(CXX) -o $@ $^
@@ -54,6 +56,11 @@ smoother: example_smoother_comparison
 circuit: example_forced_circuit
 	./$^ > circuit.out
 	python3.8 plot/solution_plot_1D.py circuit.out
+
+
+multilevel: example_multilevel_performance
+	./$^ > multilevel.out
+	python3.8 plot/convergence_history.py multilevel.out
 
 
 build/%.o: src/%.cpp
