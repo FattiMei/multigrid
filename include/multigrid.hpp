@@ -50,11 +50,11 @@ class MgSolver : public IterativeSolver {
 		const RestrictionOperator  restrict;
 		const ProlongationOperator prolong;
 
-		std::vector<int>     grid_size;
-		std::vector<double*> grid_solution;
+		std::vector<int>		grid_size;
+		std::vector<double*>		grid_solution;
 		std::vector<PointerVariant<double>> grid_rhs;
-		std::vector<double*> grid_residual;
-		std::vector<DiscreteOperator*>  grid_operator;
+		std::vector<double*>		grid_residual;
+		std::vector<DiscreteOperator*>	grid_operator;
 
 		double* solution_memory;
 		double* rhs_memory;
@@ -66,7 +66,6 @@ int analyze_cycle_recipe(const std::vector<MgOp> &recipe);
 
 // probably needs to be specialized for each problem
 std::vector<int> compute_grid_sizes(const int n, const int maxdepth);
-bool compute_grid_sizes(const int n, const int maxlevels, std::vector<int> &grid_size);
 
 
 namespace MgCycle {

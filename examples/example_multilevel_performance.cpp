@@ -4,10 +4,10 @@
 
 
 int main() {
-	constexpr int n       = 2001;
-	constexpr int maxiter = 1000;
+	constexpr int n       = 1025;
+	constexpr int maxiter = 2000;
 
-	IsotropicPoisson1D problem(
+	const IsotropicPoisson1D problem(
 		0.0,
 		1.0,
 		n,
@@ -15,23 +15,37 @@ int main() {
 		{0.0, 0.0}
 	);
 
-	MgSolver solver(
-		&problem,
-		MgCycle::V(1),
-		InitializationStrategy::Zeros,
-		UpdateStrategy::GaussSeidel
-	);
+	// TODO: use std::unique_ptr
+	const std::vector<std::pair<std::string,IterativeSolver*>> solvers{
+		{"2-level"   , new MgSolver(&problem, MgCycle::V(1), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
+		{"3-level"   , new MgSolver(&problem, MgCycle::V(2), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
+		{"5-level"   , new MgSolver(&problem, MgCycle::V(4), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
+		{"7-level"   , new MgSolver(&problem, MgCycle::V(6), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)}
+	};
 
-	std::cout << "it,mg" << std::endl;
+	std::cout << "it";
+	for (auto [label, _] : solvers) {
+		std::cout << "," << label;
+	}
+	std::cout << std::endl;
 
-	for (int it = 0; it < maxiter; ++it) {
-		std::cout << it << ',';
 
-		std::cout << solver.get_residual_norm();
-		solver.step();
+	for (int i = 0; i < maxiter; ++i) {
+		std::cout << i;
+
+		for (auto [_, solver] : solvers) {
+			std::cout << "," << solver->get_residual_norm();
+			solver->step();
+		}
 
 		std::cout << std::endl;
 	}
+
+
+	for (auto [_, solver] : solvers) {
+		delete solver;
+	}
+
 
 	return 0;
 }

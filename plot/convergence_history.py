@@ -18,7 +18,7 @@ if __name__ == '__main__':
     plt.ylabel("$||r||$")
 
     for i in range(1,len(columns)):
-        plt.semilogy(df[columns[0]], df[columns[i]], STYLE[i % len(STYLE)], label=columns[i])
+        plt.semilogy(df[columns[0]], df[columns[i]], label=columns[i])
 
     plt.legend()
     plt.show()
