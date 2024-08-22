@@ -3,6 +3,19 @@
 #include <numeric>
 
 
+std::ostream& operator<<(std::ostream& os, const MgOp op) {
+	switch (op) {
+		case MgOp::Relax         : os << "Relax"         ; break;
+		case MgOp::Restrict      : os << "Restrict"      ; break;
+		case MgOp::Prolong       : os << "Prolong"       ; break;
+		case MgOp::DirectSolve   : os << "DirectSolve"   ; break;
+		case MgOp::IterativeSolve: os << "IterativeSolve"; break;
+	}
+
+	return os;
+}
+
+
 MgSolver::MgSolver(
 	const Problem*			problem,
 	const std::vector<MgOp>		cycle_spec,
@@ -233,6 +246,53 @@ std::vector<MgOp> MgCycle::V(const int levels_one_indexed, const int smoothing_s
 		result.push_back(MgOp::Relax);
 	}
 
+	for (int i = 0; i < levels; ++i) {
+		result.push_back(MgOp::Prolong);
+
+		for (int step = 0; step < smoothing_steps; ++step) {
+			result.push_back(MgOp::Relax);
+		}
+	}
+
+	return result;
+}
+
+
+std::vector<MgOp> MgCycle::F(const int levels_one_indexed, const int smoothing_steps, const bool solve) {
+	const int levels   = levels_one_indexed - 1;
+	const auto MgSolve = solve ? MgOp::DirectSolve : MgOp::Relax;
+	std::vector<MgOp> result;
+
+	for (int i = 0; i < levels; ++i) {
+		for (int step = 0; step < smoothing_steps; ++step) {
+			result.push_back(MgOp::Relax);
+		}
+
+		result.push_back(MgOp::Restrict);
+	}
+
+	for (int i = 0; i < levels; ++i) {
+		for (int j = 0; j < i; ++j) {
+			result.push_back(MgOp::Prolong);
+
+			for (int step = 0; step < smoothing_steps; ++step) {
+				result.push_back(MgOp::Relax);
+			}
+		}
+
+		for (int j = 0; j < i; ++j) {
+			result.push_back(MgOp::Restrict);
+
+			if (j < (i-1)) {
+				for (int step = 0; step < smoothing_steps; ++step) {
+					result.push_back(MgOp::Relax);
+				}
+			}
+		}
+
+		result.push_back(MgSolve);
+	}
+	
 	for (int i = 0; i < levels; ++i) {
 		result.push_back(MgOp::Prolong);
 

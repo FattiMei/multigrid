@@ -4,6 +4,7 @@
 
 #include "solvers.hpp"
 #include "vpointer.hpp"
+#include <iostream>
 
 
 enum class MgOp {
@@ -13,6 +14,9 @@ enum class MgOp {
 	DirectSolve,
 	IterativeSolve  // not used in production, only for debugging purpuoses
 };
+
+
+std::ostream& operator<<(std::ostream& os, const MgOp op);
 
 
 using RestrictionOperator  = std::function<void(const int, const double*, double*)>;
@@ -74,6 +78,7 @@ std::vector<int> compute_grid_sizes(const int n, const int maxdepth);
 namespace MgCycle {
 // @DESIGN: levels is one indexed so that levels=2 for a multigrid with two grids (main and coarse). Sacrifice ease of implementation for usability
 std::vector<MgOp> V(const int levels, const int smoothing_steps = 1, const bool solve = true);
+std::vector<MgOp> F(const int levels, const int smoothing_steps = 1, const bool solve = true);
 }
 
 

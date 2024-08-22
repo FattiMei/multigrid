@@ -30,10 +30,44 @@ int main() {
 		MgOp::Prolong,
 		MgOp::Relax,
 	};
+	const auto vcycle_alternative = MgCycle::V(3);
+	assert(equal(vcycle_reference, vcycle_alternative));
 
-	const auto alternative = MgCycle::V(3);
 
-	assert(equal(vcycle_reference, alternative));
+	const std::vector<MgOp> fcycle_reference {
+		MgOp::Relax,
+		MgOp::Restrict,
+		MgOp::Relax,
+		MgOp::Restrict,
+		MgOp::Relax,
+		MgOp::Restrict,
+		MgOp::DirectSolve,
+		MgOp::Prolong,
+		MgOp::Relax,
+		MgOp::Restrict,
+		MgOp::DirectSolve,
+		MgOp::Prolong,
+		MgOp::Relax,
+		MgOp::Prolong,
+		MgOp::Relax,
+		MgOp::Restrict,
+		MgOp::Relax,
+		MgOp::Restrict,
+		MgOp::DirectSolve,
+		MgOp::Prolong,
+		MgOp::Relax,
+		MgOp::Prolong,
+		MgOp::Relax,
+		MgOp::Prolong,
+		MgOp::Relax,
+	};
+	const auto fcycle_alternative = MgCycle::F(4);
+
+	for (auto op : fcycle_alternative) {
+		std::cout << op << std::endl;
+	}
+
+	assert(equal(fcycle_reference, fcycle_alternative));
 
 	return 0;
 }
