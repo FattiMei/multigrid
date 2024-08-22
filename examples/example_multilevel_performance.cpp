@@ -18,10 +18,10 @@ int main() {
 
 	// TODO: use std::unique_ptr
 	const std::vector<std::pair<std::string,std::shared_ptr<IterativeSolver>>> solvers{
-		{"2-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(1, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
-		{"3-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(2, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
-		{"5-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(4, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
-		{"7-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(6, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)}
+		{"2-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(2), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
+		{"3-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(3), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
+		{"5-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(5), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
+		{"7-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(7), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)}
 	};
 
 	std::cout << "it";

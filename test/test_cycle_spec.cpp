@@ -31,7 +31,7 @@ int main() {
 		MgOp::Relax,
 	};
 
-	const auto alternative = MgCycle::V(2);
+	const auto alternative = MgCycle::V(3);
 
 	assert(equal(vcycle_reference, alternative));
 
