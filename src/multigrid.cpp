@@ -36,7 +36,8 @@ MgSolver::MgSolver(
 
 	build_level_to_memory_map();
 
-	for (int level = 0; level <= maxlevels; ++level) {
+	grid_operator.push_back(op);
+	for (int level = 1; level <= maxlevels; ++level) {
 		grid_operator.push_back(problem->get_discrete_operator(level));
 	}
 
