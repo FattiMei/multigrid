@@ -39,6 +39,8 @@ MgSolver::MgSolver(
 	for (int level = 0; level <= maxlevels; ++level) {
 		grid_operator.push_back(problem->get_discrete_operator(level));
 	}
+
+	direct_solver.compute(grid_operator.back()->get_sparse_repr());
 }
 
 
@@ -85,7 +87,10 @@ void MgSolver::step() {
 			} break;
 
 			case MgOp::DirectSolve: {
-				assert(0 && "Not implemented");
+				Eigen::Map<const Eigen::VectorXd> b(grid_rhs[level].get_const_ptr(), grid_size[level]);
+				Eigen::Map<Eigen::VectorXd> tmp(grid_solution[level], grid_size[level]);
+
+				tmp = direct_solver.solve(b);
 			} break;
 
 			case MgOp::IterativeSolve: {
@@ -216,8 +221,7 @@ std::vector<MgOp> MgCycle::V(int maxdepth, bool solve) {
 	}
 
 	if (solve) {
-		// TODO: this will be a direct solve
-		result.push_back(MgOp::IterativeSolve);
+		result.push_back(MgOp::DirectSolve);
 	}
 	else {
 		result.push_back(MgOp::Relax);

@@ -50,6 +50,8 @@ class MgSolver : public IterativeSolver {
 		const RestrictionOperator  restrict;
 		const ProlongationOperator prolong;
 
+		Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> direct_solver;
+
 		std::vector<int>		grid_size;
 		std::vector<double*>		grid_solution;
 		std::vector<PointerVariant<double>> grid_rhs;

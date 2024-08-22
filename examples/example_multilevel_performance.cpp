@@ -4,8 +4,8 @@
 
 
 int main() {
-	constexpr int n       = 1025;
-	constexpr int maxiter = 2000;
+	constexpr int n       = (2 << 15) + 1;
+	constexpr int maxiter = 100;
 
 	const IsotropicPoisson1D problem(
 		0.0,
@@ -17,10 +17,10 @@ int main() {
 
 	// TODO: use std::unique_ptr
 	const std::vector<std::pair<std::string,IterativeSolver*>> solvers{
-		{"2-level"   , new MgSolver(&problem, MgCycle::V(1), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
-		{"3-level"   , new MgSolver(&problem, MgCycle::V(2), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
-		{"5-level"   , new MgSolver(&problem, MgCycle::V(4), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
-		{"7-level"   , new MgSolver(&problem, MgCycle::V(6), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)}
+		{"2-level"   , new MgSolver(&problem, MgCycle::V(1, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
+		{"3-level"   , new MgSolver(&problem, MgCycle::V(2, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
+		{"5-level"   , new MgSolver(&problem, MgCycle::V(4, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
+		{"7-level"   , new MgSolver(&problem, MgCycle::V(6, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)}
 	};
 
 	std::cout << "it";
