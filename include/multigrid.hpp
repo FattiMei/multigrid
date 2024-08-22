@@ -72,7 +72,7 @@ std::vector<int> compute_grid_sizes(const int n, const int maxdepth);
 
 
 namespace MgCycle {
-std::vector<MgOp> V(int maxdepth, bool solve = false);
+std::vector<MgOp> V(const int levels, const int smoothing_steps = 1, const bool solve = true);
 }
 
 

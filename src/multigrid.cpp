@@ -213,11 +213,15 @@ std::vector<int> compute_grid_sizes(const int n, const int maxdepth) {
 }
 
 
-std::vector<MgOp> MgCycle::V(int maxdepth, bool solve) {
+// I could in principle precompute the number of MgOps given the cycle spec to optimize the allocations...
+std::vector<MgOp> MgCycle::V(const int levels, const int smoothing_steps, const bool solve) {
 	std::vector<MgOp> result;
 
-	for (int i = 0; i < maxdepth; ++i) {
-		result.push_back(MgOp::Relax);
+	for (int i = 0; i < levels; ++i) {
+		for (int step = 0; step < smoothing_steps; ++step) {
+			result.push_back(MgOp::Relax);
+		}
+
 		result.push_back(MgOp::Restrict);
 	}
 
@@ -228,9 +232,12 @@ std::vector<MgOp> MgCycle::V(int maxdepth, bool solve) {
 		result.push_back(MgOp::Relax);
 	}
 
-	for (int i = 0; i < maxdepth; ++i) {
+	for (int i = 0; i < levels; ++i) {
 		result.push_back(MgOp::Prolong);
-		result.push_back(MgOp::Relax);
+
+		for (int step = 0; step < smoothing_steps; ++step) {
+			result.push_back(MgOp::Relax);
+		}
 	}
 
 	return result;
