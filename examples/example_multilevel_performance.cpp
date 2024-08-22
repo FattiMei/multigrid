@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "poisson.hpp"
 #include "multigrid.hpp"
 
@@ -16,11 +17,11 @@ int main() {
 	);
 
 	// TODO: use std::unique_ptr
-	const std::vector<std::pair<std::string,IterativeSolver*>> solvers{
-		{"2-level"   , new MgSolver(&problem, MgCycle::V(1, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
-		{"3-level"   , new MgSolver(&problem, MgCycle::V(2, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
-		{"5-level"   , new MgSolver(&problem, MgCycle::V(4, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
-		{"7-level"   , new MgSolver(&problem, MgCycle::V(6, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)}
+	const std::vector<std::pair<std::string,std::shared_ptr<IterativeSolver>>> solvers{
+		{"2-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(1, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
+		{"3-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(2, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
+		{"5-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(4, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)},
+		{"7-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(6, true), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, injective_restriction, linear_prolongation)}
 	};
 
 	std::cout << "it";
@@ -39,11 +40,6 @@ int main() {
 		}
 
 		std::cout << std::endl;
-	}
-
-
-	for (auto [_, solver] : solvers) {
-		delete solver;
 	}
 
 

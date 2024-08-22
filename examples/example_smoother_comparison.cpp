@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "poisson.hpp"
 #include "solvers.hpp"
 
@@ -16,10 +17,10 @@ int main() {
 	);
 
 
-	const std::vector<std::pair<std::string, IterativeSolver*>> solvers{
-		{"jacobi"   , new SmootherSolver(&problem, InitializationStrategy::Zeros, UpdateStrategy::Jacobi)},
-		{"gseidel"  , new SmootherSolver(&problem, InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel)},
-		{"red-black", new SmootherSolver(&problem, InitializationStrategy::Zeros, UpdateStrategy::RedBlack)}
+	const std::vector<std::pair<std::string, std::shared_ptr<IterativeSolver>>> solvers{
+		{"jacobi"   , std::make_shared<SmootherSolver>(&problem, InitializationStrategy::Zeros, UpdateStrategy::Jacobi)},
+		{"gseidel"  , std::make_shared<SmootherSolver>(&problem, InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel)},
+		{"red-black", std::make_shared<SmootherSolver>(&problem, InitializationStrategy::Zeros, UpdateStrategy::RedBlack)}
 	};
 
 
@@ -38,9 +39,6 @@ int main() {
 
 		std::cout << std::endl;
 	}
-
-
-	for (auto [_, solver] : solvers) delete solver;
 
 
 	return 0;
