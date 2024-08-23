@@ -303,3 +303,43 @@ std::vector<MgOp> MgCycle::F(const int levels_one_indexed, const int smoothing_s
 
 	return result;
 }
+
+
+void wcycle_helper(std::vector<MgOp>& recipe, const int level, const int maxlevels, const int smoothing_steps, const MgOp MgSolve) {
+	if (level == maxlevels) {
+		for (int i = 0; i < smoothing_steps; ++i) {
+			recipe.push_back(MgOp::Relax);
+		}
+
+		recipe.push_back(MgOp::Restrict);
+		recipe.push_back(MgSolve);
+		recipe.push_back(MgOp::Prolong);
+	}
+	else {
+		for (int i = 0; i < smoothing_steps; ++i) {
+			recipe.push_back(MgOp::Relax);
+		}
+		recipe.push_back(MgOp::Restrict);
+
+		wcycle_helper(recipe, level+1, maxlevels, smoothing_steps, MgSolve);
+		wcycle_helper(recipe, level+1, maxlevels, smoothing_steps, MgSolve);
+
+		for (int i = 0; i < smoothing_steps; ++i) {
+			recipe.push_back(MgOp::Relax);
+		}
+		recipe.push_back(MgOp::Prolong);
+	}
+}
+
+
+std::vector<MgOp> MgCycle::W(const int levels_one_indexed, const int smoothing_steps, const bool solve) {
+	const int levels   = levels_one_indexed - 1;
+	const auto MgSolve = solve ? MgOp::DirectSolve : MgOp::Relax;
+	std::vector<MgOp> result;
+
+	// recursive approach to the problem
+	wcycle_helper(result, 1, levels, smoothing_steps, MgSolve);
+	result.push_back(MgOp::Relax);
+
+	return result;
+}

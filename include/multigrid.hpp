@@ -79,6 +79,7 @@ namespace MgCycle {
 // @DESIGN: levels is one indexed so that levels=2 for a multigrid with two grids (main and coarse). Sacrifice ease of implementation for usability
 std::vector<MgOp> V(const int levels, const int smoothing_steps = 1, const bool solve = true);
 std::vector<MgOp> F(const int levels, const int smoothing_steps = 1, const bool solve = true);
+std::vector<MgOp> W(const int levels, const int smoothing_steps = 1, const bool solve = true);
 }
 
 
