@@ -6,7 +6,7 @@ OPT         = -O2
 
 
 test_src    = test_compute_residual.cpp test_eigen_interop.cpp test_sparse_repr.cpp test_stress_direct.cpp test_cycle_spec.cpp
-example_src = example_smoother_comparison.cpp example_forced_circuit.cpp example_multilevel_performance.cpp
+example_src = example_smoother_comparison.cpp example_forced_circuit.cpp example_multilevel_performance.cpp example_cycle_performance.cpp
 targets    += $(patsubst %.cpp,%,$(test_src))
 targets    += $(patsubst %.cpp,%,$(example_src))
 
@@ -24,6 +24,11 @@ example_forced_circuit: build/example_forced_circuit.o build/circuit.o build/sol
 
 example_multilevel_performance: build/example_multilevel_performance.o build/poisson.o build/solvers.o build/stencil.o build/multigrid.o build/utils.o
 	$(CXX) -o $@ $^
+
+
+example_cycle_performance: build/example_cycle_performance.o build/poisson.o build/solvers.o build/stencil.o build/multigrid.o build/utils.o
+	$(CXX) -o $@ $^
+
 
 test_compute_residual: build/test_compute_residual.o build/poisson.o build/stencil.o build/utils.o
 	$(CXX) -o $@ $^
@@ -66,6 +71,11 @@ circuit: example_forced_circuit
 multilevel: example_multilevel_performance
 	./$^ > multilevel.out
 	python3.8 plot/convergence_history.py multilevel.out
+
+
+cycle: example_cycle_performance
+	./$^ > cycle.out
+	python3.8 plot/convergence_history.py cycle.out
 
 
 build/%.o: src/%.cpp
