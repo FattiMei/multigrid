@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include <cmath>
 #include <random>
 
 
@@ -17,4 +18,28 @@ std::vector<double> generate_random_vector(int n, double inf, double sup, int se
 	}
 
 	return result;
+}
+
+
+double linfnorm(const std::vector<double> &x, const std::vector<double> &y) {
+	double max = 0.0;
+
+	for (size_t i = 0; i < x.size(); ++i) {
+		max = std::max(max, std::abs(x[i] - y[i]));
+	}
+
+	return max;
+}
+
+
+double l2norm(const std::vector<double> &x, const std::vector<double> &y) {
+	double acc = 0.0;
+
+	for (size_t i = 0; i < x.size(); ++i) {
+		const double diff = x[i] - y[i];
+
+		acc += diff * diff;
+	}
+
+	return std::sqrt(acc);
 }
