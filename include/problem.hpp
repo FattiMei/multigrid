@@ -18,6 +18,8 @@ class Problem {
 		virtual ~Problem() = default;
 
 		virtual DiscreteOperator* get_discrete_operator(const int level = 0) const = 0;
+		virtual double get_step() const = 0;
+
 		int get_size() const { return n; };
 		const double* get_rhs() const { return static_cast<const double*>(rhs.data()); };
 
