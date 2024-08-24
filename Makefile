@@ -5,7 +5,7 @@ OPT         = -O2
 
 
 
-test_src    = test_compute_residual.cpp test_eigen_interop.cpp test_sparse_repr.cpp test_stress_direct.cpp test_cycle_spec.cpp
+test_src    = test_compute_residual.cpp test_eigen_interop.cpp test_sparse_repr.cpp test_operator_restriction.cpp test_stress_direct.cpp test_cycle_spec.cpp
 example_src = example_smoother_comparison.cpp example_forced_circuit.cpp example_multilevel_performance.cpp example_cycle_performance.cpp
 targets    += $(patsubst %.cpp,%,$(test_src))
 targets    += $(patsubst %.cpp,%,$(example_src))
@@ -49,6 +49,10 @@ test_sparse_repr: build/test_sparse_repr.o build/poisson.o build/stencil.o build
 	$(CXX) -o $@ $^
 
 
+test_operator_restriction: build/test_operator_restriction.o build/poisson.o build/stencil.o build/utils.o
+	$(CXX) -o $@ $^
+
+
 test_stress_direct: build/test_stress_direct.o build/poisson.o build/stencil.o build/solvers.o build/utils.o
 	$(CXX) -o $@ $^
 
@@ -56,6 +60,10 @@ test_stress_direct: build/test_stress_direct.o build/poisson.o build/stencil.o b
 stress: test_stress_direct
 	./$< > stress.out
 	python3.8 plot/stress_direct.py stress.out
+
+
+operator: test_operator_restriction
+	./$^
 
 
 smoother: example_smoother_comparison

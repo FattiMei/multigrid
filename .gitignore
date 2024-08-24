@@ -10,6 +10,7 @@ example_smoother_comparison
 test_compute_residual
 test_cycle_spec
 test_eigen_interop
+test_operator_restriction
 test_sparse_repr
 test_stress_direct
 presentation.odp
