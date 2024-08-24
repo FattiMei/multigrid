@@ -5,6 +5,7 @@ analysis/.ipynb_checkpoints/
 *.csv
 example_forced_circuit
 example_cycle_performance
+example_convergence
 example_multilevel_performance
 example_smoother_comparison
 test_compute_residual
