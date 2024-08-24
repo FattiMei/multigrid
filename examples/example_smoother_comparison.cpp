@@ -5,7 +5,7 @@
 
 
 int main() {
-	constexpr int n       = 2000;
+	constexpr int n       = 100;
 	constexpr int maxiter = 1000;
 
 	IsotropicPoisson1D problem(
