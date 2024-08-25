@@ -54,7 +54,6 @@ class MgSolver : public IterativeSolver {
 		const RestrictionOperator  restrict;
 		const ProlongationOperator prolong;
 
-		// Eigen::SimplicialLDLT performs worse
 		Eigen::SparseLU<Eigen::SparseMatrix<double>> direct_solver;
 
 		std::vector<int>		grid_size;
