@@ -40,14 +40,24 @@ IterativeSolver::IterativeSolver(const Problem *p, InitializationStrategy strate
 void IterativeSolver::solve(const double tol, const int maxiter) {
 	if (status == SolverStatus::OK) {
 		status = SolverStatus::MAXIT;
+		double rold = std::numeric_limits<double>::infinity();
 
 		for (it = 0; it < maxiter; ++it) {
 			this->step();
 
-			if (op->compute_residual_norm(rhs, u.data()) < tol) {
+			const double rnew = op->compute_residual_norm(rhs, u.data());
+
+			if (std::abs(rnew - rold) < 1e-8) {
+				status = SolverStatus::STAGNATE;
+				break;
+			}
+
+			if (rnew < tol) {
 				status = SolverStatus::OK;
 				break;
 			}
+
+			rold = rnew;
 		}
 	}
 }

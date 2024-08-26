@@ -18,7 +18,7 @@ example_smoother_comparison: build/example_smoother_comparison.o build/poisson.o
 	$(CXX) -o $@ $^
 
 
-example_forced_circuit: build/example_forced_circuit.o build/circuit.o build/solvers.o build/stencil.o build/utils.o
+example_forced_circuit: build/example_forced_circuit.o build/circuit.o build/solvers.o build/multigrid.o build/stencil.o build/utils.o
 	$(CXX) -o $@ $^
 
 

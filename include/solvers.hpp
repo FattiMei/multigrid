@@ -7,7 +7,8 @@
 
 enum class SolverStatus {
 	OK,
-	MAXIT
+	MAXIT,
+	STAGNATE
 };
 
 
