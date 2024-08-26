@@ -17,6 +17,9 @@ class ForcedRC : public Problem {
 		~ForcedRC() = default;
 
 		double get_step() const override { return h; };
+		int get_dimension(const int dim) const override {
+			return dim == 0 ? n : 0;
+		};
 		DiscreteOperator* get_discrete_operator(const int level = 0) const override;
 		const std::vector<double>& get_mesh() const;
 

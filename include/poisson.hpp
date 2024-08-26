@@ -17,6 +17,9 @@ class IsotropicPoisson1D : public Problem {
 		~IsotropicPoisson1D() = default;
 
 		double get_step() const override { return h; };
+		int get_dimension(const int dim) const override {
+			return dim == 0 ? n : 0;
+		};
 		DiscreteOperator* get_discrete_operator(const int level = 0) const override;
 
 
@@ -51,6 +54,17 @@ class IsotropicPoisson2D : public Problem {
 		~IsotropicPoisson2D() = default;
 
 		double get_step() const override { return hx; };
+		int get_dimension(const int dim) const override {
+			if (dim == 0) {
+				return rows;
+			}
+
+			if (dim == 1) {
+				return cols;
+			}
+
+			return 0;
+		}
 		DiscreteOperator* get_discrete_operator(const int level = 0) const override;
 
 
