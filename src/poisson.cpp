@@ -73,6 +73,7 @@ IsotropicPoisson2D::IsotropicPoisson2D(
 ) :
 	Problem(n*n),
 	rows(n),
+	cols(n),
 	hx((top_right_corner.first - bottom_left_corner.first) / (n-1.0)),
 	hy((top_right_corner.second - bottom_left_corner.second) / (n-1.0))
 {

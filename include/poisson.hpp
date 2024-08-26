@@ -56,6 +56,7 @@ class IsotropicPoisson2D : public Problem {
 
 	private:
 		const int rows;
+		const int cols;
 		const double hx;
 		const double hy;
 };

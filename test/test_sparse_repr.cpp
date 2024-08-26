@@ -4,12 +4,12 @@
 
 
 int main() {
-	IsotropicPoisson1D problem(
-		0.0,
-		1.0,
+	IsotropicPoisson2D problem(
+		{0.0, 0.0},
+		{1.0, 1.0},
 		5,
-		[](double x){ (void) x; return 0.0; },
-		{0.0, 0.0}
+		[](double x, double y){ return x + y; },
+		[](double x, double y){ return 0.0; }
 	);
 
 	DiscreteOperator *op = problem.get_discrete_operator();

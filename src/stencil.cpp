@@ -326,6 +326,32 @@ FivePointStencil::FivePointStencil(const int n, const int m, const std::array<do
 void FivePointStencil::relax(const double b[], double u[], UpdateStrategy strategy) {
 	switch (strategy) {
 		case UpdateStrategy::Jacobi: {
+			if (local.size() < static_cast<size_t>(n)) local.resize(n);
+
+			for (int i = 0; i < cols; ++i) {
+				local[i] = b[i];
+			}
+
+			for (int row = 1; row < rows-1; ++row) {
+				const int start = cols * row;
+				const int end   = start + cols - 1;
+
+				local[start] = b[start];
+
+				for (int i = start + 1; i < end; ++i) {
+					local[i] = (b[i] - stencil[0] * u[i-1] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols]) / stencil[1];
+				}
+
+				u[end]   = b[end];
+			}
+
+			for (int i = cols * (rows-1); i < rows * cols; ++i) {
+				local[i] = b[i];
+			}
+
+			for (int i = 0; i < n; ++i) {
+				u[i] = local[i];
+			}
 
 		} break;
 
@@ -334,7 +360,7 @@ void FivePointStencil::relax(const double b[], double u[], UpdateStrategy strate
 				u[i] = b[i];
 			}
 
-			for (int row = 1; row < rows; ++row) {
+			for (int row = 1; row < rows-1; ++row) {
 				const int start = cols * row;
 				const int end   = start + cols - 1;
 
@@ -353,6 +379,35 @@ void FivePointStencil::relax(const double b[], double u[], UpdateStrategy strate
 		} break;
 
 		case UpdateStrategy::RedBlack: {
+			for (int i = 0; i < cols; ++i) {
+				u[i] = b[i];
+			}
+
+			for (int row = 1; row < rows-1; ++row) {
+				const int start = cols * row;
+				const int end   = start + cols - 1;
+
+				u[start] = b[start];
+
+				for (int i = start + 1 + (row % 2); i < end; i += 2) {
+					u[i] = (b[i] - stencil[0] * u[i-1] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols]) / stencil[1];
+				}
+
+				u[end] = b[end];
+			}
+
+			for (int row = 1; row < rows-1; ++row) {
+				const int start = cols * row;
+				const int end   = start + cols - 1;
+
+				for (int i = start + 1 + (1 - (row % 2)); i < end; i += 2) {
+					u[i] = (b[i] - stencil[0] * u[i-1] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols]) / stencil[1];
+				}
+			}
+
+			for (int i = cols * (rows-1); i < rows * cols; ++i) {
+				u[i] = b[i];
+			}
 
 		} break;
 	}
@@ -360,8 +415,34 @@ void FivePointStencil::relax(const double b[], double u[], UpdateStrategy strate
 
 
 Eigen::SparseMatrix<double> FivePointStencil::get_sparse_repr() const {
-	Eigen::SparseMatrix<double> A;
+	Eigen::SparseMatrix<double> A(n,n);
 
+	for (int i = 0; i < cols; ++i) {
+		A.coeffRef(i,i) = 1.0;
+	}
+
+	for (int row = 1; row < rows-1; ++row) {
+		const int start = cols * row;
+		const int end   = start + cols - 1;
+
+		A.coeffRef(start,start) = 1.0;
+
+		for (int i = start + 1; i < end; ++i) {
+			A.coeffRef(i,i-1)    = stencil[0];
+			A.coeffRef(i,i)      = stencil[1];
+			A.coeffRef(i,i+1)    = stencil[2];
+			A.coeffRef(i,i+cols) = stencil[3];
+			A.coeffRef(i,i-cols) = stencil[4];
+		}
+
+		A.coeffRef(end,end) = 1.0;
+	}
+
+	for (int i = cols * (rows-1); i < rows * cols; ++i) {
+		A.coeffRef(i,i) = 1.0;
+	}
+
+	A.makeCompressed();
 	return A;
 }
 
@@ -371,7 +452,7 @@ void FivePointStencil::compute_residual(const double b[], const double u[], doub
 		r[i] = b[i] - u[i];
 	}
 
-	for (int row = 1; row < rows; ++row) {
+	for (int row = 1; row < rows-1; ++row) {
 		const int start = cols * row;
 		const int end   = start + cols - 1;
 
@@ -394,39 +475,31 @@ double FivePointStencil::compute_residual_norm(const double b[], const double u[
 	double acc = 0.0;
 	double diff;
 
-	/*
 	for (int i = 0; i < cols; ++i) {
 		diff = b[i] - u[i];
 		acc += diff * diff;
 	}
-	*/
 
-	for (int row = 1; row < rows; ++row) {
+	for (int row = 1; row < rows-1; ++row) {
 		const int start = cols * row;
 		const int end   = start + cols - 1;
 
-		/*
 		diff = b[start] - u[start];
 		acc += diff * diff;
-		*/
 
 		for (int i = start + 1; i < end; ++i) {
 			diff = b[i] - stencil[0] * u[i-1] - stencil[1] * u[i] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols];
 			acc += diff * diff;
 		}
 
-		/*
 		diff = b[end] - u[end];
 		acc += diff * diff;
-		*/
 	}
 
-	/*
 	for (int i = cols * (rows-1); i < rows * cols; ++i) {
 		diff = b[i] - u[i];
 		acc += diff * diff;
 	}
-	*/
 
 	return std::sqrt(acc);
 }
