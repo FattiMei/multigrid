@@ -14,5 +14,6 @@ test_eigen_interop
 test_operator_restriction
 test_sparse_repr
 test_stress_direct
+test_stencil
 presentation.odp
 .~lock.presentation.odp#

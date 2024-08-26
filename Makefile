@@ -5,8 +5,8 @@ OPT         = -O2
 
 
 
-test_src    = test_compute_residual.cpp test_eigen_interop.cpp test_sparse_repr.cpp test_operator_restriction.cpp test_stress_direct.cpp test_cycle_spec.cpp
-example_src = example_smoother_comparison.cpp example_forced_circuit.cpp example_multilevel_performance.cpp example_cycle_performance.cpp example_convergence.cpp
+test_src    = test_compute_residual.cpp test_eigen_interop.cpp test_sparse_repr.cpp test_operator_restriction.cpp test_stress_direct.cpp test_cycle_spec.cpp test_stencil.cpp
+example_src = example_smoother_comparison.cpp example_forced_circuit.cpp example_multilevel_performance.cpp example_cycle_performance.cpp example_convergence.cpp example_fundamental_problem.cpp
 targets    += $(patsubst %.cpp,%,$(test_src))
 targets    += $(patsubst %.cpp,%,$(example_src))
 
@@ -34,6 +34,10 @@ example_convergence: build/example_convergence.o build/poisson.o build/stencil.o
 	$(CXX) -o $@ $^
 
 
+example_fundamental_problem: build/example_fundamental_problem.o build/poisson.o build/stencil.o build/solvers.o build/multigrid.o build/utils.o
+	$(CXX) -o $@ $^
+
+
 test_compute_residual: build/test_compute_residual.o build/poisson.o build/stencil.o build/utils.o
 	$(CXX) -o $@ $^
 	./$@
@@ -51,6 +55,11 @@ test_cycle_spec: build/test_cycle_spec.o build/multigrid.o build/solvers.o
 
 test_sparse_repr: build/test_sparse_repr.o build/poisson.o build/stencil.o build/utils.o
 	$(CXX) -o $@ $^
+
+
+test_stencil: build/test_stencil.o build/stencil.o build/utils.o
+	$(CXX) -o $@ $^
+	./$@
 
 
 test_operator_restriction: build/test_operator_restriction.o build/poisson.o build/stencil.o build/utils.o
@@ -93,6 +102,11 @@ cycle: example_cycle_performance
 convergence: example_convergence
 	./$^ > convergence.out
 	python3.8 plot/convergence_order.py convergence.out
+
+
+run: example_fundamental_problem
+	./$^ > fundamental.out
+	python3.8 plot/convergence_history.py fundamental.out
 
 
 build/%.o: src/%.cpp

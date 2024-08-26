@@ -20,12 +20,12 @@ class IsotropicPoisson1D : public Problem {
 		DiscreteOperator* get_discrete_operator(const int level = 0) const override;
 
 
-	private:
+	protected:
 		const double h;
 };
 
 
-class PoissonPreciseVariant : public Problem {
+class PoissonPreciseVariant : public IsotropicPoisson1D {
 	public:
 		PoissonPreciseVariant(
 			const double inf,
@@ -33,15 +33,9 @@ class PoissonPreciseVariant : public Problem {
 			const int    n,
 			const std::function<double(double)> f,
 			const std::pair<double,double> boundary
-		);
-		~PoissonPreciseVariant() = default;
+		) : IsotropicPoisson1D(inf, sup, n, f, boundary) {};
 
-		double get_step() const override { return h; };
 		DiscreteOperator* get_discrete_operator(const int level = 0) const override;
-
-
-	private:
-		const double h;
 };
 
 
