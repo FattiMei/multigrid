@@ -31,8 +31,8 @@ MgSolver::MgSolver(
 	maxlevels(analyze_cycle_recipe(recipe)),
 	restrict(restrictor),
 	prolong(prolonger),
-	prova(compute_grid_sizes(problem, maxlevels)),
-	grid_size(compute_grid_sizes(n, maxlevels))
+	grid_dim(compute_grid_dim(problem, maxlevels)),
+	grid_size(compute_grid_size(grid_dim))
 {
 	const int total_elements = std::accumulate(grid_size.begin(), grid_size.end(), 0);
 	solution_memory = new double[total_elements - n];
@@ -85,7 +85,7 @@ void MgSolver::step() {
 				// zeroing the error is important!
 				for (int i = 0; i < grid_size[level+1]; ++i) grid_solution[level+1][i] = 0.0;
 
-				restrict(grid_size[level], grid_residual[level], grid_rhs[level+1].get_mutable_ptr());
+				restrict(grid_dim[level], grid_residual[level], grid_rhs[level+1].get_mutable_ptr());
 				++level;
 			} break;
 
@@ -93,7 +93,7 @@ void MgSolver::step() {
 				// using residual memory only as alias for the error correction
 				double* error_correction = grid_residual[level-1];
 
-				prolong(grid_size[level], grid_solution[level], error_correction);
+				prolong(grid_dim[level], grid_solution[level], error_correction);
 				--level;
 
 				for (int i = 0; i < grid_size[level]; ++i) {
@@ -143,14 +143,17 @@ void MgSolver::build_level_to_memory_map() {
 
 
 // all these implementations assume that pointers have sufficient size
-void injective_restriction(const int n, const double src[], double dest[]) {
+void injection_restriction_1d(const std::pair<int,int> dim, const double src[], double dest[]) {
+	const int n = dim.first;
+
 	for (int i = 0, write_index = 0; i < n; i += 2) {
 		dest[write_index++] = src[i];
 	}
 }
 
 
-void full_weight_restriction(const int n, const double src[], double dest[]) {
+void full_weight_restriction_1d(const std::pair<int,int> dim, const double src[], double dest[]) {
+	const int n = dim.first;
 	int write_index = 0;
 	dest[write_index++] = src[0];
 
@@ -162,7 +165,8 @@ void full_weight_restriction(const int n, const double src[], double dest[]) {
 }
 
 
-void linear_prolongation(const int m, const double src[], double dest[]) {
+void linear_prolongation_1d(const std::pair<int,int> dim, const double src[], double dest[]) {
+	const int m = dim.first;
 	int write_index = 0;
 
 	for (int i = 0; i < m-1; ++i) {
@@ -171,6 +175,7 @@ void linear_prolongation(const int m, const double src[], double dest[]) {
 	}
 
 	dest[write_index] = src[m-1];
+	
 }
 
 
@@ -206,33 +211,12 @@ int analyze_cycle_recipe(const std::vector<MgOp> &recipe) {
 }
 
 
-std::vector<int> compute_grid_sizes(const int n, const int maxdepth) {
-	std::vector<int> grid_size(maxdepth+1);
-	int m = n;
-
-	grid_size[0] = n;
-
-	for (int level = 1; level <= maxdepth; ++level) {
-		if ((m-1) % 2 == 0) {
-			m = 1 + (m-1)/2;
-
-			grid_size[level] = m;
-		}
-		else {
-			throw std::logic_error("Can't produce subgrid");
-		}
-	}
-
-	return grid_size;
-}
-
-
-std::vector<std::pair<int,int>> compute_grid_sizes(const Problem* problem, const int maxdepth) {
+std::vector<std::pair<int,int>> compute_grid_dim(const Problem* problem, const int maxdepth) {
 	std::vector<std::pair<int,int>> grid_size(maxdepth+1);
 	grid_size[0] = {problem->get_dimension(0), problem->get_dimension(1)};
 
+	int m = grid_size[0].first;
 	for (int level = 1; level <= maxdepth; ++level) {
-		int m = grid_size[0].first;
 
 		if ((m-1) % 2 == 0) {
 			m = 1 + (m-1)/2;
@@ -244,9 +228,8 @@ std::vector<std::pair<int,int>> compute_grid_sizes(const Problem* problem, const
 		}
 	}
 
-	if (grid_size[0].second != 0) {
-		int m = grid_size[0].second;
-
+	m = grid_size[0].second;
+	if (m != 0) {
 		for (int level = 1; level <= maxdepth; ++level) {
 			if ((m-1) % 2 == 0) {
 				m = 1 + (m-1)/2;
@@ -266,6 +249,21 @@ std::vector<std::pair<int,int>> compute_grid_sizes(const Problem* problem, const
 	*/
 
 	return grid_size;
+}
+
+
+std::vector<int> compute_grid_size(const std::vector<std::pair<int,int>>& sizes) {
+	std::vector<int> result(sizes.size());
+
+	for (size_t i = 0; i < result.size(); ++i) {
+		result[i] = sizes[i].first;
+
+		if (sizes[i].second != 0) {
+			result[i] *= sizes[i].second;
+		}
+	}
+
+	return result;
 }
 
 

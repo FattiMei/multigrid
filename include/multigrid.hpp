@@ -19,16 +19,13 @@ enum class MgOp {
 std::ostream& operator<<(std::ostream& os, const MgOp op);
 
 
-using RestrictionOperator  = std::function<void(const int, const double*, double*)>;
-using ProlongationOperator = std::function<void(const int, const double*, double*)>;
+using RestrictionOperator  = std::function<void(const std::pair<int,int>, const double*, double*)>;
+using ProlongationOperator = std::function<void(const std::pair<int,int>, const double*, double*)>;
 
 
-void injective_restriction  (const int n, const double src[], double dest[]);
-void full_weight_restriction(const int n, const double src[], double dest[]);
-void linear_prolongation    (const int m, const double src[], double dest[]);
-
-void injective_restriction_2d(const int n, const double src[], double dest[]);
-void linear_prolongation_2d(const int m, const double src[], double dest[]);
+void injection_restriction_1d  (const std::pair<int,int> dim, const double src[], double dest[]);
+void full_weight_restriction_1d(const std::pair<int,int> dim, const double src[], double dest[]);
+void linear_prolongation_1d    (const std::pair<int,int> dim, const double src[], double dest[]);
 
 
 class MgSolver : public IterativeSolver {
@@ -38,8 +35,8 @@ class MgSolver : public IterativeSolver {
 			const std::vector<MgOp>		cycle_spec,
 			const InitializationStrategy	strategy,
 			const UpdateStrategy		smoother,
-			RestrictionOperator		restrict = full_weight_restriction,
-			ProlongationOperator		prolong  = linear_prolongation
+			RestrictionOperator		restrict = full_weight_restriction_1d,
+			ProlongationOperator		prolong  = linear_prolongation_1d
 		);
 		~MgSolver();
 
@@ -59,7 +56,7 @@ class MgSolver : public IterativeSolver {
 
 		Eigen::SparseLU<Eigen::SparseMatrix<double>> direct_solver;
 
-		std::vector<std::pair<int,int>> prova;
+		std::vector<std::pair<int,int>> grid_dim;
 
 		std::vector<int>		grid_size;
 		std::vector<double*>		grid_solution;
@@ -77,7 +74,8 @@ int analyze_cycle_recipe(const std::vector<MgOp> &recipe);
 
 // needs to be specialized for the problem dimensionality
 std::vector<int> compute_grid_sizes(const int n, const int maxdepth);
-std::vector<std::pair<int,int>> compute_grid_sizes(const Problem* problem, const int maxdepth);
+std::vector<std::pair<int,int>> compute_grid_dim(const Problem* problem, const int maxdepth);
+std::vector<int> compute_grid_size(const std::vector<std::pair<int,int>>& sizes);
 
 
 namespace MgCycle {

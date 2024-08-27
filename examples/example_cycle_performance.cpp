@@ -18,9 +18,9 @@ int main() {
 
 	// TODO: use std::unique_ptr
 	const std::vector<std::pair<std::string,std::shared_ptr<IterativeSolver>>> solvers{
-		{"V-cycle"   , std::make_shared<MgSolver>(&problem, MgCycle::V(4), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, full_weight_restriction, linear_prolongation)},
-		{"F-cycle"   , std::make_shared<MgSolver>(&problem, MgCycle::F(4), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, full_weight_restriction, linear_prolongation)},
-		{"W-cycle"   , std::make_shared<MgSolver>(&problem, MgCycle::W(4), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, full_weight_restriction, linear_prolongation)},
+		{"V-cycle"   , std::make_shared<MgSolver>(&problem, MgCycle::V(4), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, full_weight_restriction_1d, linear_prolongation_1d)},
+		{"F-cycle"   , std::make_shared<MgSolver>(&problem, MgCycle::F(4), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, full_weight_restriction_1d, linear_prolongation_1d)},
+		{"W-cycle"   , std::make_shared<MgSolver>(&problem, MgCycle::W(4), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, full_weight_restriction_1d, linear_prolongation_1d)},
 	};
 
 	std::cout << "it";

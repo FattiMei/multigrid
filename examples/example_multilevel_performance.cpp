@@ -7,19 +7,19 @@
 
 int main() {
 	constexpr int n       = (2 << 20) + 1;
-	constexpr int maxiter = 30;
+	constexpr int maxiter = 10;
 
-	const IsotropicPoisson1D problem(
+	const PoissonPreciseVariant problem(
 		0.0,
 		1000.0,
 		n,
-		[](double x){ return 1.0; },
-		{0.0, 0.0}
+		[](double x){ return x * std::sin(0.1 * x) - x*x; },
+		{1.0, 1.0}
 	);
 
 	const auto smoother     = UpdateStrategy::RedBlack;
-	const auto restriction  = full_weight_restriction;
-	const auto prolongation = linear_prolongation;
+	const auto restriction  = full_weight_restriction_1d;
+	const auto prolongation = linear_prolongation_1d;
 
 	const std::vector<std::pair<std::string,std::shared_ptr<IterativeSolver>>> solvers{
 		{"2-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(2, 3), InitializationStrategy::Zeros, smoother, restriction, prolongation)},

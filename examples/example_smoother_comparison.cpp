@@ -8,12 +8,12 @@ int main() {
 	constexpr int n       = 100;
 	constexpr int maxiter = 1000;
 
-	IsotropicPoisson1D problem(
-		0.0,
-		1.0,
+	IsotropicPoisson2D problem(
+		{0.0, 0.0},
+		{1.0, 1.0},
 		n,
-		[](double x){ return x; },
-		{0.0, 0.0}
+		[](double x, double y){ return x + y; },
+		[](double x, double y){ return 0.0; }
 	);
 
 
