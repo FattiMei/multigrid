@@ -6,23 +6,23 @@
 
 
 int main() {
-	constexpr int n       = (2 << 20) + 1;
+	constexpr int n       = (2 << 8) + 1;
 	constexpr int maxiter = 10;
 
-	const PoissonPreciseVariant problem(
-		0.0,
-		1000.0,
+	IsotropicPoisson2D problem(
+		{0.0, 0.0},
+		{1.0, 1.0},
 		n,
-		[](double x){ return x * std::sin(0.1 * x) - x*x; },
-		{1.0, 1.0}
+		[](double x, double y){ return x + y; },
+		[](double x, double y){ return 0.0; }
 	);
 
-	const auto smoother     = UpdateStrategy::RedBlack;
-	const auto restriction  = full_weight_restriction_1d;
-	const auto prolongation = linear_prolongation_1d;
+	const auto smoother     = UpdateStrategy::GaussSeidel;
+	const auto restriction  = injection_restriction_2d;
+	const auto prolongation = linear_prolongation_2d;
 
 	const std::vector<std::pair<std::string,std::shared_ptr<IterativeSolver>>> solvers{
-		{"2-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(2, 3), InitializationStrategy::Zeros, smoother, restriction, prolongation)},
+		// {"2-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(2, 3, false), InitializationStrategy::Zeros, smoother, restriction, prolongation)},
 		{"3-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(3, 3), InitializationStrategy::Zeros, smoother, restriction, prolongation)},
 		{"5-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(5, 3), InitializationStrategy::Zeros, smoother, restriction, prolongation)},
 		{"7-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(7, 3), InitializationStrategy::Zeros, smoother, restriction, prolongation)}

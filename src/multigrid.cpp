@@ -172,50 +172,64 @@ void linear_prolongation_1d(const std::pair<int,int> dim, const double src[], do
 }
 
 
-void injection_restriction_2d  (const std::pair<int,int> dim, const double src[], double dest[]) {
-	int write_index = 0;
+void injection_restriction_2d(const std::pair<int,int> dim, const double src[], double dest[]) {
+	const int target_cols = 1 + (dim.second - 1) / 2;
 
 	for (int i = 0; i < dim.first; i += 2) {
 		for (int j = 0; j < dim.second; j += 2) {
-			dest[write_index++] = src[i * dim.second + j];
+			dest[(i / 2) * target_cols + (j / 2)] = src[i * dim.second + j];
 		}
 	}
 }
 
 
 void full_weight_restriction_2d(const std::pair<int,int> dim, const double src[], double dest[]) {
-	// maintain constant the boundary terms (should be 0)
-	int write_index = 0;
-	
-	for (int j = 0; j < dim.second; j += 2) {
-		dest[write_index++] = 0.0;
-	}
+	const int target_cols = 1 + (dim.second - 1) / 2;
 
 	for (int i = 2; i < dim.first-1; i += 2) {
-		dest[write_index++] = 0.0;
-
 		for (int j = 0; j < dim.second; j += 2) {
-			const int read_index = i * dim.second + j;
+			const int linear_index = i * dim.second + j;
 
-			dest[write_index++] =
-				  0.5   * src[read_index]
-				+ 0.125 * src[read_index - 1]
-				+ 0.125 * src[read_index + 1]
-				+ 0.125 * src[read_index + dim.second]
-				+ 0.125 * src[read_index - dim.second];
+			dest[(i / 2) * target_cols + (j / 2)] =
+				  0.5   * src[linear_index]
+				+ 0.125 * src[linear_index - 1]
+				+ 0.125 * src[linear_index + 1]
+				+ 0.125 * src[linear_index + dim.second]
+				+ 0.125 * src[linear_index - dim.second];
 		}
-
-		dest[write_index++] = 0.0;
-	}
-
-	for (int j = 0; j < dim.second; j += 2) {
-		dest[write_index++] = 0.0;
 	}
 }
 
 
-void linear_prolongation_2d    (const std::pair<int,int> dim, const double src[], double dest[]) {
+void linear_prolongation_2d(const std::pair<int,int> dim, const double src[], double dest[]) {
+	const int source_cols = 1 + (dim.second - 1) / 2;
 
+	for (int i = 1; i < dim.first-1; ++i) {
+		for (int j = 1; j < dim.second-1; ++j) {
+			const int linear_index = (i / 2) * source_cols + (j / 2);
+
+			if (i % 2 == 1 and j % 2 == 1) {
+				dest[i * dim.second + j] =
+					  0.25 * src[linear_index]
+					+ 0.25 * src[linear_index + 1]
+					+ 0.25 * src[linear_index + source_cols]
+					+ 0.25 * src[linear_index + source_cols + 1];
+			}
+			else if (i % 2 == 1) {
+				dest[i * dim.second + j] =
+					  0.5 * src[linear_index]
+					+ 0.5 * src[linear_index + source_cols];
+			}
+			else if (j % 2 == 1) {
+				dest[i * dim.second + j] =
+					  0.5 * src[linear_index]
+					+ 0.5 * src[linear_index + 1];
+			}
+			else {
+				dest[i * dim.second + j] = src[linear_index];
+			}
+		}
+	}
 }
 
 
