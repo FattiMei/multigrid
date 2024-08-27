@@ -27,6 +27,9 @@ void injective_restriction  (const int n, const double src[], double dest[]);
 void full_weight_restriction(const int n, const double src[], double dest[]);
 void linear_prolongation    (const int m, const double src[], double dest[]);
 
+void injective_restriction_2d(const int n, const double src[], double dest[]);
+void linear_prolongation_2d(const int m, const double src[], double dest[]);
+
 
 class MgSolver : public IterativeSolver {
 	public:
@@ -56,6 +59,8 @@ class MgSolver : public IterativeSolver {
 
 		Eigen::SparseLU<Eigen::SparseMatrix<double>> direct_solver;
 
+		std::vector<std::pair<int,int>> prova;
+
 		std::vector<int>		grid_size;
 		std::vector<double*>		grid_solution;
 		std::vector<PointerVariant<double>> grid_rhs;
@@ -70,8 +75,9 @@ class MgSolver : public IterativeSolver {
 
 int analyze_cycle_recipe(const std::vector<MgOp> &recipe);
 
-// probably needs to be specialized for each problem
+// needs to be specialized for the problem dimensionality
 std::vector<int> compute_grid_sizes(const int n, const int maxdepth);
+std::vector<std::pair<int,int>> compute_grid_sizes(const Problem* problem, const int maxdepth);
 
 
 namespace MgCycle {

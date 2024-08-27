@@ -31,6 +31,7 @@ MgSolver::MgSolver(
 	maxlevels(analyze_cycle_recipe(recipe)),
 	restrict(restrictor),
 	prolong(prolonger),
+	prova(compute_grid_sizes(problem, maxlevels)),
 	grid_size(compute_grid_sizes(n, maxlevels))
 {
 	const int total_elements = std::accumulate(grid_size.begin(), grid_size.end(), 0);
@@ -221,6 +222,48 @@ std::vector<int> compute_grid_sizes(const int n, const int maxdepth) {
 			throw std::logic_error("Can't produce subgrid");
 		}
 	}
+
+	return grid_size;
+}
+
+
+std::vector<std::pair<int,int>> compute_grid_sizes(const Problem* problem, const int maxdepth) {
+	std::vector<std::pair<int,int>> grid_size(maxdepth+1);
+	grid_size[0] = {problem->get_dimension(0), problem->get_dimension(1)};
+
+	for (int level = 1; level <= maxdepth; ++level) {
+		int m = grid_size[0].first;
+
+		if ((m-1) % 2 == 0) {
+			m = 1 + (m-1)/2;
+
+			grid_size[level].first = m;
+		}
+		else {
+			throw std::logic_error("Can't produce subgrid");
+		}
+	}
+
+	if (grid_size[0].second != 0) {
+		int m = grid_size[0].second;
+
+		for (int level = 1; level <= maxdepth; ++level) {
+			if ((m-1) % 2 == 0) {
+				m = 1 + (m-1)/2;
+
+				grid_size[level].second = m;
+			}
+			else {
+				throw std::logic_error("Can't produce subgrid");
+			}
+		}
+	}
+
+	/* DEBUG
+	for (auto& [a, b] : grid_size) {
+		std::cout << a << ' ' << b << std::endl;
+	}
+	*/
 
 	return grid_size;
 }
