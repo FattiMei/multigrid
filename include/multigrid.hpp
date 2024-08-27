@@ -27,6 +27,10 @@ void injection_restriction_1d  (const std::pair<int,int> dim, const double src[]
 void full_weight_restriction_1d(const std::pair<int,int> dim, const double src[], double dest[]);
 void linear_prolongation_1d    (const std::pair<int,int> dim, const double src[], double dest[]);
 
+void injection_restriction_2d  (const std::pair<int,int> dim, const double src[], double dest[]);
+void full_weight_restriction_2d(const std::pair<int,int> dim, const double src[], double dest[]);
+void linear_prolongation_2d    (const std::pair<int,int> dim, const double src[], double dest[]);
+
 
 class MgSolver : public IterativeSolver {
 	public:

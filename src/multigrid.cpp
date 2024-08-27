@@ -34,10 +34,11 @@ MgSolver::MgSolver(
 	grid_dim(compute_grid_dim(problem, maxlevels)),
 	grid_size(compute_grid_size(grid_dim))
 {
+	// @DESIGN: zero initialize the memory so that projection and restriction operators don't need to care about the boundary nodes
 	const int total_elements = std::accumulate(grid_size.begin(), grid_size.end(), 0);
-	solution_memory = new double[total_elements - n];
-	rhs_memory      = new double[total_elements - n];
-	residual_memory = new double[total_elements];
+	solution_memory = new double[total_elements - n]{};
+	rhs_memory      = new double[total_elements - n]{};
+	residual_memory = new double[total_elements]{};
 
 
 	// @DESIGN: this complication is necessary because:
@@ -93,7 +94,7 @@ void MgSolver::step() {
 				// using residual memory only as alias for the error correction
 				double* error_correction = grid_residual[level-1];
 
-				prolong(grid_dim[level], grid_solution[level], error_correction);
+				prolong(grid_dim[level-1], grid_solution[level], error_correction);
 				--level;
 
 				for (int i = 0; i < grid_size[level]; ++i) {
@@ -143,39 +144,78 @@ void MgSolver::build_level_to_memory_map() {
 
 
 // all these implementations assume that pointers have sufficient size
+// using index arithmetic instead of write_index to avoid loop carried dependencies
 void injection_restriction_1d(const std::pair<int,int> dim, const double src[], double dest[]) {
-	const int n = dim.first;
-
-	for (int i = 0, write_index = 0; i < n; i += 2) {
-		dest[write_index++] = src[i];
+	for (int i = 0; i < dim.first; i += 2) {
+		dest[i / 2] = src[i];
 	}
 }
 
 
 void full_weight_restriction_1d(const std::pair<int,int> dim, const double src[], double dest[]) {
-	const int n = dim.first;
-	int write_index = 0;
-	dest[write_index++] = src[0];
-
-	for (int i = 2; i < n-1; i += 2) {
-		dest[write_index++] = 0.25 * src[i-1] + 0.5 * src[i] + 0.25 * src[i+1];
+	for (int i = 2; i < dim.first-1; i += 2) {
+		dest[i / 2] = 0.25 * src[i-1] + 0.5 * src[i] + 0.25 * src[i+1];
 	}
-
-	dest[write_index] = src[n-1];
 }
 
 
+// dim is the TARGET grid dimension
 void linear_prolongation_1d(const std::pair<int,int> dim, const double src[], double dest[]) {
-	const int m = dim.first;
+	for (int i = 0; i < dim.first; ++i) {
+		if (i % 2 == 0) {
+			dest[i] = src[i / 2];
+		}
+		else {
+			dest[i] = 0.5 * src[i / 2] + 0.5 * src[i / 2 + 1];
+		}
+	}
+}
+
+
+void injection_restriction_2d  (const std::pair<int,int> dim, const double src[], double dest[]) {
 	int write_index = 0;
 
-	for (int i = 0; i < m-1; ++i) {
-		dest[write_index++] = src[i];
-		dest[write_index++] = 0.5 * src[i] + 0.5 * src[i+1];
+	for (int i = 0; i < dim.first; i += 2) {
+		for (int j = 0; j < dim.second; j += 2) {
+			dest[write_index++] = src[i * dim.second + j];
+		}
+	}
+}
+
+
+void full_weight_restriction_2d(const std::pair<int,int> dim, const double src[], double dest[]) {
+	// maintain constant the boundary terms (should be 0)
+	int write_index = 0;
+	
+	for (int j = 0; j < dim.second; j += 2) {
+		dest[write_index++] = 0.0;
 	}
 
-	dest[write_index] = src[m-1];
-	
+	for (int i = 2; i < dim.first-1; i += 2) {
+		dest[write_index++] = 0.0;
+
+		for (int j = 0; j < dim.second; j += 2) {
+			const int read_index = i * dim.second + j;
+
+			dest[write_index++] =
+				  0.5   * src[read_index]
+				+ 0.125 * src[read_index - 1]
+				+ 0.125 * src[read_index + 1]
+				+ 0.125 * src[read_index + dim.second]
+				+ 0.125 * src[read_index - dim.second];
+		}
+
+		dest[write_index++] = 0.0;
+	}
+
+	for (int j = 0; j < dim.second; j += 2) {
+		dest[write_index++] = 0.0;
+	}
+}
+
+
+void linear_prolongation_2d    (const std::pair<int,int> dim, const double src[], double dest[]) {
+
 }
 
 
