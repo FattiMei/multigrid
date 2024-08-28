@@ -1,6 +1,7 @@
 #include "multigrid.hpp"
 #include <iostream>
 #include <numeric>
+#include <algorithm>
 
 
 std::ostream& operator<<(std::ostream& os, const MgOp op) {
@@ -56,7 +57,18 @@ MgSolver::MgSolver(
 		grid_operator.push_back(problem->get_discrete_operator(level));
 	}
 
-	direct_solver.compute(grid_operator.back()->get_sparse_repr());
+	// for some reason I couldn't do it in the function `analyze_cycle_recipe` in the constructor
+	if (std::find(recipe.begin(), recipe.end(), MgOp::DirectSolve) != std::end(recipe)) {
+		Eigen::SparseMatrix<double> A = grid_operator.back()->get_sparse_repr();
+		direct_solver.analyzePattern(A);
+		direct_solver.factorize(A);
+
+		if (direct_solver.info() != Eigen::Success) {
+			throw std::runtime_error("Eigen has failed to factorize the matrix");
+		}
+
+		// direct_solver.compute(grid_operator.back()->get_sparse_repr());
+	}
 }
 
 
@@ -254,8 +266,8 @@ int analyze_cycle_recipe(const std::vector<MgOp> &recipe) {
 
 				break;
 
-			case MgOp::Relax:
 			case MgOp::DirectSolve:
+			case MgOp::Relax:
 			case MgOp::IterativeSolve:
 				break;
 		}
