@@ -11,9 +11,9 @@ int main() {
 	const std::pair<double,double> bottom_left_corner{0.0, 0.0};
 	const std::pair<double,double> top_right_corner{1.0, 1.0};
 
-	std::cout << "n,err" << std::endl;
+	std::cout << "n,direct,iterative" << std::endl;
 
-	for (int n = 2; n <= 128; n *= 2) {
+	for (int n = 4; n <= 128; n *= 2) {
 		const int m = n + 1;
 		const IsotropicPoisson2D problem(
 			bottom_left_corner,
@@ -29,10 +29,13 @@ int main() {
 			&problem,
 			MgCycle::V(2),
 			InitializationStrategy::Zeros,
-			UpdateStrategy::GaussSeidel
+			UpdateStrategy::GaussSeidel,
+			injection_restriction_2d,
+			linear_prolongation_2d
 		);
 
 		direct.solve();
+		iterative.solve(1e-16, 10);
 
 		std::vector<double> exact_solution(m*m);
 		for (int i = 0; i < m; ++i) {
@@ -48,6 +51,8 @@ int main() {
 			<< n
 			<< ','
 			<< linfnorm(exact_solution, direct.get_solution())
+			<< ','
+			<< linfnorm(exact_solution, iterative.get_solution())
 			<< std::endl;
 	}
 

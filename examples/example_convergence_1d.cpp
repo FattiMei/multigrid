@@ -26,13 +26,17 @@ int main() {
 			&problem,
 			MgCycle::V(2),
 			InitializationStrategy::Zeros,
-			UpdateStrategy::GaussSeidel
+			UpdateStrategy::GaussSeidel,
+			full_weight_restriction_1d,
+			linear_prolongation_1d
 		);
 		MgSolver precise(
 			&alternative,
 			MgCycle::V(2),
 			InitializationStrategy::Zeros,
-			UpdateStrategy::GaussSeidel
+			UpdateStrategy::GaussSeidel,
+			full_weight_restriction_1d,
+			linear_prolongation_1d
 		);
 
 		direct.solve();

@@ -44,10 +44,10 @@ int main() {
 	);
 	const auto exact_solution = compute_exact_solution(problem);
 	const std::vector<std::pair<std::string,std::shared_ptr<IterativeSolver>>> solvers{
-		{"2-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(2, 3), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel)},
-		{"3-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(3, 3), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel)},
-		{"5-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(5, 3), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel)},
-		{"7-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(7, 3), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel)},
+		{"2-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(2, 3), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, full_weight_restriction_1d, linear_prolongation_2d)},
+		{"3-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(3, 3), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, full_weight_restriction_1d, linear_prolongation_2d)},
+		{"5-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(5, 3), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, full_weight_restriction_1d, linear_prolongation_2d)},
+		{"7-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(7, 3), InitializationStrategy::Zeros, UpdateStrategy::GaussSeidel, full_weight_restriction_1d, linear_prolongation_2d)},
 	};
 	double tol = 1e-16;
 

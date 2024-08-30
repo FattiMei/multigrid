@@ -39,8 +39,8 @@ class MgSolver : public IterativeSolver {
 			const std::vector<MgOp>		cycle_spec,
 			const InitializationStrategy	strategy,
 			const UpdateStrategy		smoother,
-			RestrictionOperator		restrict = full_weight_restriction_1d,
-			ProlongationOperator		prolong  = linear_prolongation_1d
+			RestrictionOperator		restrict,
+			ProlongationOperator		prolong
 		);
 		~MgSolver();
 
