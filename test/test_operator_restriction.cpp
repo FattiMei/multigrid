@@ -3,6 +3,7 @@
 #include "poisson.hpp"
 
 
+// not really a test but lets me visualize the sparse matrix and eye check it
 int main() {
 	IsotropicPoisson1D problem(
 		0.0,

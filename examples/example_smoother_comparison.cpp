@@ -13,7 +13,7 @@ int main() {
 		{1.0, 1.0},
 		n,
 		[](double x, double y){ return x + y; },
-		[](double x, double y){ return 0.0; }
+		[](double x, double y){ (void) x; (void) y; return 0.0; }
 	);
 
 
@@ -24,7 +24,7 @@ int main() {
 	};
 
 
-	std::cout << "n";
+	std::cout << "it";
 	for (auto [label, _] : solvers) std::cout << ',' << label;
 	std::cout << std::endl;
 

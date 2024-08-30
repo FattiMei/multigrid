@@ -9,7 +9,7 @@ int main() {
 		{1.0, 1.0},
 		5,
 		[](double x, double y){ return x + y; },
-		[](double x, double y){ return 0.0; }
+		[](double x, double y){ (void) x; (void) y; return 0.0; }
 	);
 
 	DiscreteOperator *op = problem.get_discrete_operator();

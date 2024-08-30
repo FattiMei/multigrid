@@ -42,7 +42,7 @@ DiscreteOperator* IsotropicPoisson1D::get_discrete_operator(const int level) con
 		m,
 		{-1.0 / (h*h), 2.0 / (h*h), -1.0 / (h*h)}
 	);
-};
+}
 
 
 DiscreteOperator* PoissonPreciseVariant::get_discrete_operator(const int level) const {
@@ -61,7 +61,7 @@ DiscreteOperator* PoissonPreciseVariant::get_discrete_operator(const int level) 
 		std::pow(2.0, level) * this->h,
 		{-1.0, 2.0, -1.0}
 	);
-};
+}
 
 
 IsotropicPoisson2D::IsotropicPoisson2D(
