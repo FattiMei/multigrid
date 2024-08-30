@@ -24,6 +24,7 @@ if __name__ == '__main__':
 
     [(c_name, c_code), (h_name, c_header)] = codegen(
         [
+            ('symbolic', 0),
             ('solution_1d', solution_1d),
             ('forcing_term_1d', forcing_term_1d),
             ('solution_2d', solution_2d),

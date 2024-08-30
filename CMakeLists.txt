@@ -92,14 +92,14 @@ endforeach()
 add_custom_command(
 	OUTPUT ${ARTIFACTS_SRC}
 	DEPENDS ${CMAKE_SOURCE_DIR}/analysis/poisson_exact_solution.py
-	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/analysis/poisson_exact_solution.py ${CMAKE_SOURCE_DIR}/artifacts/solution_1d.cpp ${CMAKE_SOURCE_DIR}/artifacts/solution_1d.h
+	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/analysis/poisson_exact_solution.py ${CMAKE_SOURCE_DIR}/artifacts/symbolic.cpp ${CMAKE_SOURCE_DIR}/artifacts/symbolic.h
 	COMMENT "Generating C functions from symbolic expressions"
 )
 
 add_custom_target(
 	run_symbolic_generation ALL
-	DEPENDS ${CMAKE_SOURCE_DIR}/artifacts/solution_1d.cpp
-	DEPENDS ${CMAKE_SOURCE_DIR}/artifacts/solution_1d.h
+	DEPENDS ${CMAKE_SOURCE_DIR}/artifacts/symbolic.cpp
+	DEPENDS ${CMAKE_SOURCE_DIR}/artifacts/symbolic.h
 )
 
 

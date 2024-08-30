@@ -1,5 +1,5 @@
 #include <iostream>
-#include "symbolic.hpp"
+#include "symbolic.h"
 #include "poisson.hpp"
 #include "direct.hpp"
 #include "multigrid.hpp"

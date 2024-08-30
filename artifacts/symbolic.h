@@ -7,9 +7,10 @@
  ******************************************************************************/
 
 
-#ifndef PROJECT__SOLUTION_1D__H
-#define PROJECT__SOLUTION_1D__H
+#ifndef PROJECT__SYMBOLIC__H
+#define PROJECT__SYMBOLIC__H
 
+int symbolic();
 double solution_1d(double x);
 double forcing_term_1d(double x);
 double solution_2d(double x, double y);

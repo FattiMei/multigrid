@@ -5,8 +5,16 @@
  *                                                                            *
  *                       This file is part of 'project'                       *
  ******************************************************************************/
-#include "solution_1d.h"
+#include "symbolic.h"
 #include <math.h>
+
+int symbolic() {
+
+   int symbolic_result;
+   symbolic_result = 0;
+   return symbolic_result;
+
+}
 
 double solution_1d(double x) {
 
