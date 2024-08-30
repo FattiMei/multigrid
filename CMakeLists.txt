@@ -129,9 +129,17 @@ add_custom_target(
 
 
 add_custom_target(
-	convergence
-	DEPENDS example_convergence
-	COMMAND example_convergence > out
+	convergence_1d
+	DEPENDS example_convergence_1d
+	COMMAND example_convergence_1d > out
+	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/convergence_order.py out
+)
+
+
+add_custom_target(
+	convergence_2d
+	DEPENDS example_convergence_2d
+	COMMAND example_convergence_2d > out
 	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/convergence_order.py out
 )
 

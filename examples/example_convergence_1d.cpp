@@ -39,8 +39,8 @@ int main() {
 		iterative.solve(1e-16, 100);
 		precise.solve(1e-16, 100);
 
-		std::vector<double> exact_solution(n);
-		for (int i = 0; i < n; ++i) {
+		std::vector<double> exact_solution(m);
+		for (int i = 0; i < m; ++i) {
 			exact_solution[i] = exact(linspace(inf, sup, m, i));
 		}
 
