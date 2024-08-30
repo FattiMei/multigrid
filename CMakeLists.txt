@@ -20,13 +20,10 @@ endif()
 
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-
-if (Eigen3_CXX_FOUND)
-	add_compile_options(${Eigen3_CXX_FLAGS})
-endif()
-
-
 find_package(Python3 REQUIRED)
+
+# google benchmark is absolutely fundamental for evaluating the performance of the project
+find_package(benchmark REQUIRED)
 
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
@@ -40,10 +37,12 @@ set(INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include")
 
 set(LIB_SRC_DIR      "${CMAKE_SOURCE_DIR}/src")
 set(TEST_SRC_DIR     "${CMAKE_SOURCE_DIR}/test")
+set(BENCH_SRC_DIR    "${CMAKE_SOURCE_DIR}/benchmark")
 set(EXAMPLES_SRC_DIR "${CMAKE_SOURCE_DIR}/examples")
 
 file(GLOB LIB_SRC      "${LIB_SRC_DIR}/*.cpp")
 file(GLOB TEST_SRC     "${TEST_SRC_DIR}/test_*.cpp")
+file(GLOB BENCH_SRC    "${BENCH_SRC_DIR}/*.cpp")
 file(GLOB EXAMPLES_SRC "${EXAMPLES_SRC_DIR}/example_*.cpp")
 
 
@@ -65,6 +64,16 @@ foreach(TEST_SOURCE ${TEST_SRC})
 endforeach()
 
 
+foreach(BENCH_SOURCE ${BENCH_SRC})
+	get_filename_component(EXE_NAME ${BENCH_SOURCE} NAME_WE)
+
+	add_executable(${EXE_NAME} ${BENCH_SOURCE})
+	target_link_libraries(${EXE_NAME} PRIVATE MgLib)
+	target_link_libraries(${EXE_NAME} benchmark::benchmark)
+	target_include_directories(${EXE_NAME} PRIVATE ${INCLUDE_DIRS})
+endforeach()
+
+
 foreach(EXAMPLE_SOURCE ${EXAMPLES_SRC})
 	get_filename_component(EXE_NAME ${EXAMPLE_SOURCE} NAME_WE)
 
@@ -72,6 +81,14 @@ foreach(EXAMPLE_SOURCE ${EXAMPLES_SRC})
 	target_link_libraries(${EXE_NAME} PRIVATE MgLib)
 	target_include_directories(${EXE_NAME} PRIVATE ${INCLUDE_DIRS})
 endforeach()
+
+
+# produce the exact solution and forcing term to be used in convergence tests
+add_custom_target(
+	symbolic
+	DEPENDS ${CMAKE_SOURCE_DIR}/analysis/poisson_exact_solution.py
+	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/analysis/poisson_exact_solution.py ${CMAKE_SOURCE_DIR}/artifacts/symbolic.cpp ${CMAKE_SOURCE_DIR}/artifacts/symbolic.hpp
+)
 
 
 # custom rules for calling experiments, saving the results and calling the proper python script to plot them
