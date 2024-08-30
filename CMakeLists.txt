@@ -35,19 +35,25 @@ endif()
 
 set(INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include")
 
-set(LIB_SRC_DIR      "${CMAKE_SOURCE_DIR}/src")
-set(TEST_SRC_DIR     "${CMAKE_SOURCE_DIR}/test")
-set(BENCH_SRC_DIR    "${CMAKE_SOURCE_DIR}/benchmark")
-set(EXAMPLES_SRC_DIR "${CMAKE_SOURCE_DIR}/examples")
+set(LIB_SRC_DIR         "${CMAKE_SOURCE_DIR}/src")
+set(TEST_SRC_DIR        "${CMAKE_SOURCE_DIR}/test")
+set(BENCH_SRC_DIR       "${CMAKE_SOURCE_DIR}/benchmark")
+set(EXAMPLES_SRC_DIR    "${CMAKE_SOURCE_DIR}/examples")
+set(ARTIFACTS_SRC_DIR   "${CMAKE_SOURCE_DIR}/artifacts")
 
-file(GLOB LIB_SRC      "${LIB_SRC_DIR}/*.cpp")
-file(GLOB TEST_SRC     "${TEST_SRC_DIR}/test_*.cpp")
-file(GLOB BENCH_SRC    "${BENCH_SRC_DIR}/*.cpp")
-file(GLOB EXAMPLES_SRC "${EXAMPLES_SRC_DIR}/example_*.cpp")
+file(GLOB LIB_SRC       "${LIB_SRC_DIR}/*.cpp")
+file(GLOB TEST_SRC      "${TEST_SRC_DIR}/test_*.cpp")
+file(GLOB BENCH_SRC     "${BENCH_SRC_DIR}/*.cpp")
+file(GLOB EXAMPLES_SRC  "${EXAMPLES_SRC_DIR}/example_*.cpp")
+file(GLOB ARTIFACTS_SRC "${ARTIFACTS_SRC_DIR}/*")
 
 
 add_library(MgLib STATIC ${LIB_SRC})
-target_include_directories(MgLib PRIVATE ${INCLUDE_DIRS})
+include_directories(MgLib PRIVATE ${INCLUDE_DIRS})
+
+
+add_library(Exact STATIC ${ARTIFACTS_SRC})
+include_directories(Exact PRIVATE ${ARTIFACTS_SRC_DIR})
 
 
 enable_testing()
@@ -58,7 +64,6 @@ foreach(TEST_SOURCE ${TEST_SRC})
 
 	add_executable(${EXE_NAME} ${TEST_SOURCE})
 	target_link_libraries(${EXE_NAME} PRIVATE MgLib)
-	target_include_directories(${EXE_NAME} PRIVATE ${INCLUDE_DIRS})
 
 	add_test(NAME ${EXE_NAME} COMMAND ${EXE_NAME})
 endforeach()
@@ -70,7 +75,6 @@ foreach(BENCH_SOURCE ${BENCH_SRC})
 	add_executable(${EXE_NAME} ${BENCH_SOURCE})
 	target_link_libraries(${EXE_NAME} PRIVATE MgLib)
 	target_link_libraries(${EXE_NAME} benchmark::benchmark)
-	target_include_directories(${EXE_NAME} PRIVATE ${INCLUDE_DIRS})
 endforeach()
 
 
@@ -78,16 +82,24 @@ foreach(EXAMPLE_SOURCE ${EXAMPLES_SRC})
 	get_filename_component(EXE_NAME ${EXAMPLE_SOURCE} NAME_WE)
 
 	add_executable(${EXE_NAME} ${EXAMPLE_SOURCE})
+	target_include_directories(${EXE_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/artifacts)
 	target_link_libraries(${EXE_NAME} PRIVATE MgLib)
-	target_include_directories(${EXE_NAME} PRIVATE ${INCLUDE_DIRS})
+	target_link_libraries(${EXE_NAME} PRIVATE Exact)
 endforeach()
 
 
 # produce the exact solution and forcing term to be used in convergence tests
-add_custom_target(
-	symbolic
+add_custom_command(
+	OUTPUT ${ARTIFACTS_SRC}
 	DEPENDS ${CMAKE_SOURCE_DIR}/analysis/poisson_exact_solution.py
-	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/analysis/poisson_exact_solution.py ${CMAKE_SOURCE_DIR}/artifacts/symbolic.cpp ${CMAKE_SOURCE_DIR}/artifacts/symbolic.hpp
+	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/analysis/poisson_exact_solution.py ${CMAKE_SOURCE_DIR}/artifacts/solution_1d.cpp ${CMAKE_SOURCE_DIR}/artifacts/solution_1d.h
+	COMMENT "Generating C functions from symbolic expressions"
+)
+
+add_custom_target(
+	run_symbolic_generation ALL
+	DEPENDS ${CMAKE_SOURCE_DIR}/artifacts/solution_1d.cpp
+	DEPENDS ${CMAKE_SOURCE_DIR}/artifacts/solution_1d.h
 )
 
 

@@ -1,4 +1,5 @@
 #include <iostream>
+#include "symbolic.hpp"
 #include "poisson.hpp"
 #include "direct.hpp"
 #include "multigrid.hpp"
@@ -9,8 +10,8 @@
 int main() {
 	const double inf = 0.0;
 	const double sup = 1.0;
-	const std::function<double(double)> exact = [](double x) { return std::sin(x); };
-	const std::function<double(double)> f     = [](double x) { return std::sin(x); };
+	const std::function<double(double)> exact = [](double x) { return solution_1d(x); };
+	const std::function<double(double)> f     = [](double x) { return forcing_term_1d(x); };
 	const std::pair<double,double> boundary{exact(inf), exact(sup)};
 
 	std::cout << "n,direct,naive,precise" << std::endl;
