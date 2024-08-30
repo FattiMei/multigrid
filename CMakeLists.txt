@@ -19,6 +19,16 @@ if (OpenMP_CXX_FOUND)
 endif()
 
 
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+
+if (Eigen3_CXX_FOUND)
+	add_compile_options(${Eigen3_CXX_FLAGS})
+endif()
+
+
+find_package(Python3 REQUIRED)
+
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
 	add_compile_options(-Wall -Wextra -Wpedantic)
 elseif(MSVC)
@@ -53,3 +63,53 @@ foreach(TEST_SOURCE ${TEST_SRC})
 
 	add_test(NAME ${EXE_NAME} COMMAND ${EXE_NAME})
 endforeach()
+
+
+foreach(EXAMPLE_SOURCE ${EXAMPLES_SRC})
+	get_filename_component(EXE_NAME ${EXAMPLE_SOURCE} NAME_WE)
+
+	add_executable(${EXE_NAME} ${EXAMPLE_SOURCE})
+	target_link_libraries(${EXE_NAME} PRIVATE MgLib)
+	target_include_directories(${EXE_NAME} PRIVATE ${INCLUDE_DIRS})
+endforeach()
+
+
+# custom rules for calling experiments, saving the results and calling the proper python script to plot them
+add_custom_target(
+	circuit
+	DEPENDS example_forced_circuit
+	COMMAND example_forced_circuit > out
+	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/solution_plot_1D.py out
+)
+
+
+add_custom_target(
+	multilevel
+	DEPENDS example_multilevel_performance
+	COMMAND example_multilevel_performance > out
+	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/convergence_history.py out
+)
+
+
+add_custom_target(
+	cycle
+	DEPENDS example_cycle_performance
+	COMMAND example_cycle_performance > out
+	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/convergence_history.py out
+)
+
+
+add_custom_target(
+	convergence
+	DEPENDS example_convergence
+	COMMAND example_convergence > out
+	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/convergence_order.py out
+)
+
+
+add_custom_target(
+	smoother
+	DEPENDS example_smoother_comparison
+	COMMAND example_smoother_comparison > out
+	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/convergence_history.py out
+)
