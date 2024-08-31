@@ -199,15 +199,28 @@ void full_weight_restriction_2d(const std::pair<int,int> dim, const double src[]
 	const int target_cols = 1 + (dim.second - 1) / 2;
 
 	for (int i = 2; i < dim.first-1; i += 2) {
-		for (int j = 0; j < dim.second; j += 2) {
+		for (int j = 2; j < dim.second; j += 2) {
 			const int linear_index = i * dim.second + j;
 
+			/*
 			dest[(i / 2) * target_cols + (j / 2)] =
 				  0.5   * src[linear_index]
 				+ 0.125 * src[linear_index - 1]
 				+ 0.125 * src[linear_index + 1]
 				+ 0.125 * src[linear_index + dim.second]
 				+ 0.125 * src[linear_index - dim.second];
+			*/
+
+			dest[(i / 2) * target_cols + (j / 2)] =
+				  0.25  * src[linear_index]
+				+ 0.125 * src[linear_index - 1]
+				+ 0.125 * src[linear_index + 1]
+				+ 0.125 * src[linear_index + dim.second]
+				+ 0.125 * src[linear_index - dim.second]
+				+ 0.0625 * src[linear_index + dim.second + 1]
+				+ 0.0625 * src[linear_index + dim.second - 1]
+				+ 0.0625 * src[linear_index - dim.second + 1]
+				+ 0.0625 * src[linear_index - dim.second - 1];
 		}
 	}
 }

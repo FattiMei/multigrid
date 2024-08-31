@@ -64,6 +64,26 @@ DiscreteOperator* PoissonPreciseVariant::get_discrete_operator(const int level) 
 }
 
 
+void IsotropicPoisson1D::set_initial_approximation(double u[], const InitializationStrategy strategy) const {
+	u[0] = rhs[0];
+	u[n-1] = rhs[n-1];
+
+	switch (strategy) {
+		case InitializationStrategy::Zeros: {
+			for (int i = 1; i < n-1; ++i) {
+				u[i] = 0.0;
+			}
+		} break;
+
+		case InitializationStrategy::Lerp: {
+			for (int i = 1; i < n-1; ++i) {
+				u[i] = linspace(rhs[0], rhs[1], n, i);
+			}
+		} break;
+	}
+}
+
+
 IsotropicPoisson2D::IsotropicPoisson2D(
 	const std::pair<double, double> bottom_left_corner,
 	const std::pair<double, double> top_right_corner,
@@ -132,4 +152,20 @@ DiscreteOperator* IsotropicPoisson2D::get_discrete_operator(const int level) con
 			/* SUD    */ -1.0 / (hy*hy)
 		}
 	);
+}
+
+
+void IsotropicPoisson2D::set_initial_approximation(double u[], const InitializationStrategy strategy) const {
+	(void) strategy;
+
+	for (int i = 0; i < rows; ++i) {
+		for (int j = 0; j < cols; ++j) {
+			if (i == 0 or i == (rows-1) or j == 0 or j == (cols-1)) {
+				u[i*cols+j] = rhs[i*cols+j];
+			}
+			else {
+				u[i*cols+j] = 0.0;
+			}
+		}
+	}
 }

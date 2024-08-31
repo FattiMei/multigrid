@@ -22,6 +22,8 @@ class IsotropicPoisson1D : public Problem {
 		};
 		DiscreteOperator* get_discrete_operator(const int level = 0) const override;
 
+		void set_initial_approximation(double u[], const InitializationStrategy strategy) const override;
+
 
 	protected:
 		const double h;
@@ -66,6 +68,8 @@ class IsotropicPoisson2D : public Problem {
 			return 0;
 		}
 		DiscreteOperator* get_discrete_operator(const int level = 0) const override;
+
+		void set_initial_approximation(double u[], const InitializationStrategy strategy) const override;
 
 
 	private:

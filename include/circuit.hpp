@@ -21,8 +21,9 @@ class ForcedRC : public Problem {
 			return dim == 0 ? n : 0;
 		};
 		DiscreteOperator* get_discrete_operator(const int level = 0) const override;
-		const std::vector<double>& get_mesh() const;
+		void set_initial_approximation(double u[], const InitializationStrategy strategy) const override;
 
+		const std::vector<double>& get_mesh() const;
 
 	private:
 		const double tau;

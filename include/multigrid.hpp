@@ -76,8 +76,6 @@ class MgSolver : public IterativeSolver {
 
 int analyze_cycle_recipe(const std::vector<MgOp> &recipe);
 
-// needs to be specialized for the problem dimensionality
-std::vector<int> compute_grid_sizes(const int n, const int maxdepth);
 std::vector<std::pair<int,int>> compute_grid_dim(const Problem* problem, const int maxdepth);
 std::vector<int> compute_grid_size(const std::vector<std::pair<int,int>>& sizes);
 

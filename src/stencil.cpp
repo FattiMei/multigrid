@@ -328,6 +328,24 @@ void FivePointStencil::relax(const double b[], double u[], UpdateStrategy strate
 		case UpdateStrategy::Jacobi: {
 			if (local.size() < static_cast<size_t>(n)) local.resize(n);
 
+			// needs fix, only work on the boundary --------------------------------------------
+			// for (int i = 0; i < cols; ++i) {
+			// 	u[i] = b[i];
+			// }
+
+			// for (int row = 1; row < rows-1; ++row) {
+			// 	const int start = cols * row;
+			// 	const int end   = start + cols - 1;
+
+			// 	u[start] = b[start];
+			// 	u[end]   = b[end];
+			// }
+
+			// for (int i = cols * (rows-1); i < rows * cols; ++i) {
+			// 	u[i] = b[i];
+			// }
+			// --------------------------------------------------------------------------------
+
 			for (int i = 0; i < cols; ++i) {
 				local[i] = b[i];
 			}
@@ -342,7 +360,7 @@ void FivePointStencil::relax(const double b[], double u[], UpdateStrategy strate
 					local[i] = (b[i] - stencil[0] * u[i-1] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols]) / stencil[1];
 				}
 
-				u[end]   = b[end];
+				local[end] = b[end];
 			}
 
 			for (int i = cols * (rows-1); i < rows * cols; ++i) {

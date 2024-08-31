@@ -43,6 +43,15 @@ DiscreteOperator* ForcedRC::get_discrete_operator(const int level) const {
 }
 
 
+void ForcedRC::set_initial_approximation(double u[], const InitializationStrategy strategy) const {
+	(void) strategy;
+
+	for (int i = 0; i < n; ++i) {
+		u[i] = 0;
+	}
+}
+
+
 const std::vector<double>& ForcedRC::get_mesh() const {
 	return mesh;
 }

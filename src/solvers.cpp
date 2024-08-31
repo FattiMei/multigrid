@@ -27,13 +27,7 @@ BaseSolver::~BaseSolver() {
 
 
 IterativeSolver::IterativeSolver(const Problem *p, InitializationStrategy strategy) : BaseSolver(p) {
-	switch (strategy) {
-		default: {
-			for (auto &x : u) {
-				x = 0.0;
-			}
-		}
-	}
+	problem->set_initial_approximation(u.data(), strategy);
 }
 
 
