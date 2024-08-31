@@ -9,7 +9,8 @@
 enum class UpdateStrategy {
 	Jacobi,
 	GaussSeidel,
-	RedBlack
+	RedBlack,
+	SOR
 };
 
 

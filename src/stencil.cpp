@@ -319,14 +319,42 @@ FivePointStencil::FivePointStencil(const int n, const int m, const std::array<do
 	DiscreteOperator(n * m),
 	stencil(weights),
 	rows(n),
-	cols(m)
+	cols(m),
+	local(0)
 {}
 
 
 void FivePointStencil::relax(const double b[], double u[], UpdateStrategy strategy) {
 	switch (strategy) {
+		case UpdateStrategy::SOR: {
+			const double rho = 1.5;
+
+			if (local.size() < static_cast<size_t>(n)) {
+				local.resize(n);
+			}
+
+			for (int row = 1; row < rows-1; ++row) {
+				const int start = cols * row;
+				const int end   = start + cols - 1;
+
+				for (int i = start + 1; i < end; ++i) {
+					local[i] = (b[i] - stencil[0] * u[i-1] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols]) / stencil[1];
+				}
+			}
+
+			for (int i = 0; i < n; ++i) {
+				u[i] = (1.0 - rho) * u[i] + rho * local[i];
+			}
+		} break;
+
 		case UpdateStrategy::Jacobi: {
-			if (local.size() < static_cast<size_t>(n)) local.resize(n);
+			if (local.size() < static_cast<size_t>(n)) {
+				local.resize(n);
+
+				for (int i = 0; i < n; ++i) {
+					local[i] = u[i];
+				}
+			}
 
 			// needs fix, only work on the boundary --------------------------------------------
 			// for (int i = 0; i < cols; ++i) {
@@ -346,25 +374,13 @@ void FivePointStencil::relax(const double b[], double u[], UpdateStrategy strate
 			// }
 			// --------------------------------------------------------------------------------
 
-			for (int i = 0; i < cols; ++i) {
-				local[i] = b[i];
-			}
-
 			for (int row = 1; row < rows-1; ++row) {
 				const int start = cols * row;
 				const int end   = start + cols - 1;
 
-				local[start] = b[start];
-
 				for (int i = start + 1; i < end; ++i) {
 					local[i] = (b[i] - stencil[0] * u[i-1] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols]) / stencil[1];
 				}
-
-				local[end] = b[end];
-			}
-
-			for (int i = cols * (rows-1); i < rows * cols; ++i) {
-				local[i] = b[i];
 			}
 
 			for (int i = 0; i < n; ++i) {
@@ -493,31 +509,31 @@ double FivePointStencil::compute_residual_norm(const double b[], const double u[
 	double acc = 0.0;
 	double diff;
 
-	for (int i = 0; i < cols; ++i) {
-		diff = b[i] - u[i];
-		acc += diff * diff;
-	}
+	// for (int i = 0; i < cols; ++i) {
+	// 	diff = b[i] - u[i];
+	// 	acc += diff * diff;
+	// }
 
 	for (int row = 1; row < rows-1; ++row) {
 		const int start = cols * row;
 		const int end   = start + cols - 1;
 
-		diff = b[start] - u[start];
-		acc += diff * diff;
+		// diff = b[start] - u[start];
+		// acc += diff * diff;
 
 		for (int i = start + 1; i < end; ++i) {
 			diff = b[i] - stencil[0] * u[i-1] - stencil[1] * u[i] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols];
 			acc += diff * diff;
 		}
 
-		diff = b[end] - u[end];
-		acc += diff * diff;
+		// diff = b[end] - u[end];
+		// acc += diff * diff;
 	}
 
-	for (int i = cols * (rows-1); i < rows * cols; ++i) {
-		diff = b[i] - u[i];
-		acc += diff * diff;
-	}
+	// for (int i = cols * (rows-1); i < rows * cols; ++i) {
+	// 	diff = b[i] - u[i];
+	// 	acc += diff * diff;
+	// }
 
 	return std::sqrt(acc);
 }
