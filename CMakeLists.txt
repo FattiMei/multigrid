@@ -21,8 +21,6 @@ endif()
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(Python3 REQUIRED)
-
-# google benchmark is absolutely fundamental for evaluating the performance of the project
 find_package(benchmark REQUIRED)
 
 
@@ -73,8 +71,7 @@ foreach(BENCH_SOURCE ${BENCH_SRC})
 	get_filename_component(EXE_NAME ${BENCH_SOURCE} NAME_WE)
 
 	add_executable(${EXE_NAME} ${BENCH_SOURCE})
-	target_link_libraries(${EXE_NAME} PRIVATE MgLib)
-	target_link_libraries(${EXE_NAME} benchmark::benchmark)
+	target_link_libraries(${EXE_NAME} PRIVATE MgLib Exact benchmark::benchmark)
 endforeach()
 
 
