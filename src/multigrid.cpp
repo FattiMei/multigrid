@@ -96,6 +96,7 @@ void MgSolver::step() {
 				grid_operator[level]->compute_residual(grid_rhs[level].get_const_ptr(), grid_solution[level], grid_residual[level]);
 
 				// zeroing the error is important!
+				#pragma omp parallel for
 				for (int i = 0; i < grid_size[level+1]; ++i) grid_solution[level+1][i] = 0.0;
 
 				restrict(grid_dim[level], grid_residual[level], grid_rhs[level+1].get_mutable_ptr());
@@ -109,6 +110,7 @@ void MgSolver::step() {
 				prolong(grid_dim[level-1], grid_solution[level], error_correction);
 				--level;
 
+				#pragma omp parallel for
 				for (int i = 0; i < grid_size[level]; ++i) {
 					grid_solution[level][i] += error_correction[i];
 				}
@@ -198,6 +200,7 @@ void injection_restriction_2d(const std::pair<int,int> dim, const double src[], 
 void full_weight_restriction_2d(const std::pair<int,int> dim, const double src[], double dest[]) {
 	const int target_cols = 1 + (dim.second - 1) / 2;
 
+	#pragma omp parallel for
 	for (int i = 2; i < dim.first-1; i += 2) {
 		for (int j = 2; j < dim.second-1; j += 2) {
 			const int linear_index = i * dim.second + j;
@@ -229,7 +232,8 @@ void full_weight_restriction_2d(const std::pair<int,int> dim, const double src[]
 void linear_prolongation_2d(const std::pair<int,int> dim, const double src[], double dest[]) {
 	const int source_cols = 1 + (dim.second - 1) / 2;
 
-#if 0
+#if 1
+	#pragma omp parallel for
 	for (int i = 1; i < dim.first-1; ++i) {
 		for (int j = 1; j < dim.second-1; ++j) {
 			const int linear_index = (i / 2) * source_cols + (j / 2);
@@ -257,6 +261,7 @@ void linear_prolongation_2d(const std::pair<int,int> dim, const double src[], do
 		}
 	}
 #else
+	#pragma omp parallel for
 	for (int i = 1; i < dim.first-1; ++i) {
 		for (int j = 1; j < dim.second-1; ++j) {
 			const int linear_index = (i / 2) * source_cols + (j / 2);
@@ -274,6 +279,7 @@ void linear_prolongation_2d(const std::pair<int,int> dim, const double src[], do
 		}
 	}
 
+	#pragma omp parallel for
 	for (int i = 1; i < dim.first-1; ++i) {
 		for (int j = 1; j < dim.second-1; ++j) {
 			const int linear_index = i * dim.second + j;

@@ -16,6 +16,7 @@ NaiveThreePointStencil::NaiveThreePointStencil(
 void NaiveThreePointStencil::relax(const double b[], double u[], UpdateStrategy strategy) {
 	switch (strategy) {
 		// double sweep, Jersey style
+		case UpdateStrategy::SOR:
 		case UpdateStrategy::Jacobi: {
 			if (local.size() < static_cast<size_t>(n)) local.resize(n);
 
@@ -327,12 +328,13 @@ FivePointStencil::FivePointStencil(const int n, const int m, const std::array<do
 void FivePointStencil::relax(const double b[], double u[], UpdateStrategy strategy) {
 	switch (strategy) {
 		case UpdateStrategy::SOR: {
-			const double rho = 1.5;
+			const double rho = 0.5;
 
 			if (local.size() < static_cast<size_t>(n)) {
 				local.resize(n);
 			}
 
+			#pragma omp parallel for
 			for (int row = 1; row < rows-1; ++row) {
 				const int start = cols * row;
 				const int end   = start + cols - 1;
@@ -342,38 +344,30 @@ void FivePointStencil::relax(const double b[], double u[], UpdateStrategy strate
 				}
 			}
 
+#ifdef SOR_SAME_DATA_ACCESS_PATTERN
+			#pragma omp parallel for
+			for (int row = 1; row < rows-1; ++row) {
+				const int start = cols * row;
+				const int end   = start + cols - 1;
+
+				for (int i = start + 1; i < end; ++i) {
+					u[i] = (1.0 - rho) * u[i] + rho * local[i];
+				}
+			}
+#else
+			#pragma omp parallel for
 			for (int i = 0; i < n; ++i) {
 				u[i] = (1.0 - rho) * u[i] + rho * local[i];
 			}
+#endif
 		} break;
 
 		case UpdateStrategy::Jacobi: {
 			if (local.size() < static_cast<size_t>(n)) {
 				local.resize(n);
-
-				for (int i = 0; i < n; ++i) {
-					local[i] = u[i];
-				}
 			}
 
-			// needs fix, only work on the boundary --------------------------------------------
-			// for (int i = 0; i < cols; ++i) {
-			// 	u[i] = b[i];
-			// }
-
-			// for (int row = 1; row < rows-1; ++row) {
-			// 	const int start = cols * row;
-			// 	const int end   = start + cols - 1;
-
-			// 	u[start] = b[start];
-			// 	u[end]   = b[end];
-			// }
-
-			// for (int i = cols * (rows-1); i < rows * cols; ++i) {
-			// 	u[i] = b[i];
-			// }
-			// --------------------------------------------------------------------------------
-
+			#pragma omp parallel for
 			for (int row = 1; row < rows-1; ++row) {
 				const int start = cols * row;
 				const int end   = start + cols - 1;
@@ -383,6 +377,7 @@ void FivePointStencil::relax(const double b[], double u[], UpdateStrategy strate
 				}
 			}
 
+			#pragma omp parallel for
 			for (int i = 0; i < n; ++i) {
 				u[i] = local[i];
 			}
@@ -390,46 +385,28 @@ void FivePointStencil::relax(const double b[], double u[], UpdateStrategy strate
 		} break;
 
 		case UpdateStrategy::GaussSeidel: {
-			for (int i = 0; i < cols; ++i) {
-				u[i] = b[i];
-			}
-
 			for (int row = 1; row < rows-1; ++row) {
 				const int start = cols * row;
 				const int end   = start + cols - 1;
-
-				u[start] = b[start];
 
 				for (int i = start + 1; i < end; ++i) {
 					u[i] = (b[i] - stencil[0] * u[i-1] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols]) / stencil[1];
 				}
-
-				u[end]   = b[end];
-			}
-
-			for (int i = cols * (rows-1); i < rows * cols; ++i) {
-				u[i] = b[i];
 			}
 		} break;
 
 		case UpdateStrategy::RedBlack: {
-			for (int i = 0; i < cols; ++i) {
-				u[i] = b[i];
-			}
-
+			#pragma omp parallel for
 			for (int row = 1; row < rows-1; ++row) {
 				const int start = cols * row;
 				const int end   = start + cols - 1;
 
-				u[start] = b[start];
-
 				for (int i = start + 1 + (row % 2); i < end; i += 2) {
 					u[i] = (b[i] - stencil[0] * u[i-1] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols]) / stencil[1];
 				}
-
-				u[end] = b[end];
 			}
 
+			#pragma omp parallel for
 			for (int row = 1; row < rows-1; ++row) {
 				const int start = cols * row;
 				const int end   = start + cols - 1;
@@ -437,10 +414,6 @@ void FivePointStencil::relax(const double b[], double u[], UpdateStrategy strate
 				for (int i = start + 1 + (1 - (row % 2)); i < end; i += 2) {
 					u[i] = (b[i] - stencil[0] * u[i-1] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols]) / stencil[1];
 				}
-			}
-
-			for (int i = cols * (rows-1); i < rows * cols; ++i) {
-				u[i] = b[i];
 			}
 
 		} break;
@@ -482,25 +455,14 @@ Eigen::SparseMatrix<double> FivePointStencil::get_sparse_repr() const {
 
 
 void FivePointStencil::compute_residual(const double b[], const double u[], double r[]) const {
-	for (int i = 0; i < cols; ++i) {
-		r[i] = b[i] - u[i];
-	}
-
+	#pragma omp parallel for
 	for (int row = 1; row < rows-1; ++row) {
 		const int start = cols * row;
 		const int end   = start + cols - 1;
 
-		r[start] = b[start] - u[start];
-
 		for (int i = start + 1; i < end; ++i) {
 			r[i] = b[i] - stencil[0] * u[i-1] - stencil[1] * u[i] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols];
 		}
-
-		r[end]   = b[end] - u[end];
-	}
-
-	for (int i = cols * (rows-1); i < rows * cols; ++i) {
-		r[i] = b[i] - u[i];
 	}
 }
 
@@ -509,31 +471,15 @@ double FivePointStencil::compute_residual_norm(const double b[], const double u[
 	double acc = 0.0;
 	double diff;
 
-	// for (int i = 0; i < cols; ++i) {
-	// 	diff = b[i] - u[i];
-	// 	acc += diff * diff;
-	// }
-
 	for (int row = 1; row < rows-1; ++row) {
 		const int start = cols * row;
 		const int end   = start + cols - 1;
-
-		// diff = b[start] - u[start];
-		// acc += diff * diff;
 
 		for (int i = start + 1; i < end; ++i) {
 			diff = b[i] - stencil[0] * u[i-1] - stencil[1] * u[i] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols];
 			acc += diff * diff;
 		}
-
-		// diff = b[end] - u[end];
-		// acc += diff * diff;
 	}
-
-	// for (int i = cols * (rows-1); i < rows * cols; ++i) {
-	// 	diff = b[i] - u[i];
-	// 	acc += diff * diff;
-	// }
 
 	return std::sqrt(acc);
 }
