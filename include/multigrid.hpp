@@ -30,6 +30,7 @@ void linear_prolongation_1d    (const std::pair<int,int> dim, const double src[]
 void injection_restriction_2d  (const std::pair<int,int> dim, const double src[], double dest[]);
 void full_weight_restriction_2d(const std::pair<int,int> dim, const double src[], double dest[]);
 void linear_prolongation_2d    (const std::pair<int,int> dim, const double src[], double dest[]);
+void linear_prolongation_and_correction_2d(const std::pair<int,int> dim, const double src[], double dest[]);
 
 
 class MgSolver : public IterativeSolver {
@@ -44,7 +45,7 @@ class MgSolver : public IterativeSolver {
 		);
 		~MgSolver();
 
-		void step();
+		void step() override;
 
 
 	protected:
@@ -71,6 +72,21 @@ class MgSolver : public IterativeSolver {
 		double* solution_memory;
 		double* rhs_memory;
 		double* residual_memory;
+};
+
+
+class MgFusedSolver : public MgSolver {
+	public:
+		MgFusedSolver(
+			const Problem*			problem,
+			const std::vector<MgOp>		cycle_spec,
+			const InitializationStrategy	strategy,
+			const UpdateStrategy		smoother,
+			RestrictionOperator		restrict,
+			ProlongationOperator		prolong_and_correct
+		) : MgSolver(problem, cycle_spec, strategy, smoother, restrict, prolong_and_correct) {};
+
+		void step();
 };
 
 

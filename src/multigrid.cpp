@@ -1,4 +1,5 @@
 #include "multigrid.hpp"
+#include "stencil.hpp"
 #include <iostream>
 #include <numeric>
 #include <algorithm>
@@ -114,6 +115,58 @@ void MgSolver::step() {
 				for (int i = 0; i < grid_size[level]; ++i) {
 					grid_solution[level][i] += error_correction[i];
 				}
+			} break;
+
+			case MgOp::DirectSolve: {
+				Eigen::Map<const Eigen::VectorXd> b(grid_rhs[level].get_const_ptr(), grid_size[level]);
+				Eigen::Map<Eigen::VectorXd> tmp(grid_solution[level], grid_size[level]);
+
+				tmp = direct_solver.solve(b);
+			} break;
+
+			case MgOp::IterativeSolve: {
+				for (int i = 0; i < 300; ++i) {
+					grid_operator[level]->relax(grid_rhs[level].get_const_ptr(), grid_solution[level], smoother);
+				}
+			} break;
+		}
+	}
+}
+
+
+void MgFusedSolver::step() {
+	int level = 0;
+
+	for (const auto op : recipe) {
+		switch (op) {
+			case MgOp::Relax: {
+				grid_operator[level]->relax(grid_rhs[level].get_const_ptr(), grid_solution[level], smoother);
+			} break;
+
+			case MgOp::Restrict: {
+				try {
+					FivePointStencil* opt_operator = dynamic_cast<FivePointStencil*>(grid_operator[level]);
+
+					opt_operator->compute_residual_and_restrict(grid_dim[level], grid_rhs[level].get_const_ptr(), grid_solution[level], grid_rhs[level+1].get_mutable_ptr());
+				}
+				catch (...) {
+					grid_operator[level]->compute_residual(grid_rhs[level].get_const_ptr(), grid_solution[level], grid_residual[level]);
+					restrict(grid_dim[level], grid_residual[level], grid_rhs[level+1].get_mutable_ptr());
+				}
+
+				// zeroing the error is important!
+				#pragma omp parallel for
+				for (int i = 0; i < grid_size[level+1]; ++i) grid_solution[level+1][i] = 0.0;
+				++level;
+			} break;
+
+			case MgOp::Prolong: {
+				// ATTENTION: we are assuming that prolongation prolongs the error and at the same time
+				// corrects the error on the finer grid.
+				//
+				// This is an experiment to test if there is a performance improvement
+				prolong(grid_dim[level-1], grid_solution[level], grid_solution[level-1]);
+				--level;
 			} break;
 
 			case MgOp::DirectSolve: {
@@ -293,6 +346,39 @@ void linear_prolongation_2d(const std::pair<int,int> dim, const double src[], do
 		}
 	}
 #endif
+}
+
+
+void linear_prolongation_and_correction_2d(const std::pair<int,int> dim, const double src[], double dest[]) {
+	const int source_cols = 1 + (dim.second - 1) / 2;
+
+	#pragma omp parallel for
+	for (int i = 1; i < dim.first-1; ++i) {
+		for (int j = 1; j < dim.second-1; ++j) {
+			const int linear_index = (i / 2) * source_cols + (j / 2);
+
+			if (i % 2 == 1 and j % 2 == 1) {
+				dest[i * dim.second + j] +=
+					  0.25 * src[linear_index]
+					+ 0.25 * src[linear_index + 1]
+					+ 0.25 * src[linear_index + source_cols]
+					+ 0.25 * src[linear_index + source_cols + 1];
+			}
+			else if (i % 2 == 1) {
+				dest[i * dim.second + j] +=
+					  0.5 * src[linear_index]
+					+ 0.5 * src[linear_index + source_cols];
+			}
+			else if (j % 2 == 1) {
+				dest[i * dim.second + j] +=
+					  0.5 * src[linear_index]
+					+ 0.5 * src[linear_index + 1];
+			}
+			else {
+				dest[i * dim.second + j] += src[linear_index];
+			}
+		}
+	}
 }
 
 

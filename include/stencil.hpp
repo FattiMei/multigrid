@@ -62,6 +62,8 @@ class FivePointStencil : public DiscreteOperator {
 		void   compute_residual     (const double b[], const double u[], double r[]) const override;
 		double compute_residual_norm(const double b[], const double u[]) const override;
 
+		void compute_residual_and_restrict(const std::pair<int,int> dim, const double b[], const double u[], double dest[]);
+
 
 	protected:
 		const std::array<double,5> stencil;

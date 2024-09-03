@@ -121,6 +121,7 @@ ThreePointStencil::ThreePointStencil(
 
 void ThreePointStencil::relax(const double b[], double u[], UpdateStrategy strategy) {
 	switch (strategy) {
+		case UpdateStrategy::SOR:
 		case UpdateStrategy::Jacobi: {
 			if (local.size() < static_cast<size_t>(n)) local.resize(n);
 
@@ -216,6 +217,7 @@ double ThreePointStencil::compute_residual_norm(const double b[], const double u
 void ThreePointPeriodicStencil::relax(const double b[], double u[], UpdateStrategy strategy) {
 	switch(strategy) {
 		// double sweep, Jersey style
+		case UpdateStrategy::SOR:
 		case UpdateStrategy::Jacobi: {
 			if (local.size() < static_cast<size_t>(n)) local.resize(n);
 
@@ -462,6 +464,93 @@ void FivePointStencil::compute_residual(const double b[], const double u[], doub
 
 		for (int i = start + 1; i < end; ++i) {
 			r[i] = b[i] - stencil[0] * u[i-1] - stencil[1] * u[i] - stencil[2] * u[i+1] - stencil[3] * u[i+cols] - stencil[4] * u[i-cols];
+		}
+	}
+}
+
+
+void FivePointStencil::compute_residual_and_restrict(const std::pair<int,int> dim, const double b[], const double u[], double dest[]) {
+	const int target_cols = 1 + (dim.second - 1) / 2;
+	double K[9]{};
+
+	// 6 7 8
+	// 3 4 5
+	// 0 1 2
+
+	#pragma omp parallel for private(K)
+	for (int i = 2; i < dim.first-1; i += 2) {
+		{
+			const int linear_index = i * dim.second + 2;
+
+			{
+				const int center = linear_index - cols - 1;
+
+				K[0] = b[center] - stencil[0] * u[center-1] - stencil[1] * u[center] - stencil[2] * u[center+1] - stencil[3] * u[center+cols] - stencil[4] * u[center-cols];
+			}
+			{
+				const int center = linear_index - cols;
+
+				K[1] = b[center] - stencil[0] * u[center-1] - stencil[1] * u[center] - stencil[2] * u[center+1] - stencil[3] * u[center+cols] - stencil[4] * u[center-cols];
+			}
+			{
+				const int center = linear_index - 1;
+
+				K[3] = b[center] - stencil[0] * u[center-1] - stencil[1] * u[center] - stencil[2] * u[center+1] - stencil[3] * u[center+cols] - stencil[4] * u[center-cols];
+			}
+			{
+				const int center = linear_index;
+
+				K[4] = b[center] - stencil[0] * u[center-1] - stencil[1] * u[center] - stencil[2] * u[center+1] - stencil[3] * u[center+cols] - stencil[4] * u[center-cols];
+			}
+			{
+				const int center = linear_index + cols - 1;
+
+				K[6] = b[center] - stencil[0] * u[center-1] - stencil[1] * u[center] - stencil[2] * u[center+1] - stencil[3] * u[center+cols] - stencil[4] * u[center-cols];
+			}
+			{
+				const int center = linear_index + cols;
+
+				K[7] = b[center] - stencil[0] * u[center-1] - stencil[1] * u[center] - stencil[2] * u[center+1] - stencil[3] * u[center+cols] - stencil[4] * u[center-cols];
+			}
+		}
+
+		for (int j = 2; j < dim.second-1; j += 2) {
+			const int linear_index = i * dim.second + j;
+
+			// fill the third column of K, then compute the mean
+			{
+				const int center = linear_index - cols + 1;
+
+				K[2] = b[center] - stencil[0] * u[center-1] - stencil[1] * u[center] - stencil[2] * u[center+1] - stencil[3] * u[center+cols] - stencil[4] * u[center-cols];
+			}
+			{
+				const int center = linear_index + 1;
+
+				K[5] = b[center] - stencil[0] * u[center-1] - stencil[1] * u[center] - stencil[2] * u[center+1] - stencil[3] * u[center+cols] - stencil[4] * u[center-cols];
+			}
+			{
+				const int center = linear_index + cols + 1;
+
+				K[8] = b[center] - stencil[0] * u[center-1] - stencil[1] * u[center] - stencil[2] * u[center+1] - stencil[3] * u[center+cols] - stencil[4] * u[center-cols];
+			}
+
+			dest[(i / 2) * target_cols + (j / 2)] =
+				  0.25   * K[4]
+				+ 0.125  * K[1]
+				+ 0.125  * K[3]
+				+ 0.125  * K[5]
+				+ 0.125  * K[7]
+				+ 0.0625 * K[0]
+				+ 0.0625 * K[2]
+				+ 0.0625 * K[6]
+				+ 0.0625 * K[8];
+
+			K[0] = K[1];
+			K[1] = K[2];
+			K[3] = K[4];
+			K[4] = K[5];
+			K[6] = K[7];
+			K[7] = K[8];
 		}
 	}
 }
