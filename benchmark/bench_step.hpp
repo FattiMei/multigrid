@@ -6,8 +6,9 @@
 #include "poisson.hpp"
 
 
-template <int DEPTH, auto CYCLE, auto SMOOTHER>
+template <int DEPTH, auto CYCLE, auto SMOOTHER, int OMP_NUM_THREADS=1>
 static void BM_step(benchmark::State &state) {
+	omp_set_num_threads(OMP_NUM_THREADS);
 	const int n = state.range(0) + 1;
 
 	IsotropicPoisson2D problem(

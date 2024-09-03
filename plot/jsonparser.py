@@ -18,13 +18,19 @@ def get_smoother_abbreviation(smoother):
 
 def process_name(complete_name):
     m = re.findall(
-        r'.*<(.*?),MgCycle::(.*?),UpdateStrategy::(.*?)>/(.*)',
+        r'.*<(.*?),MgCycle::(.*?),UpdateStrategy::(.*?)(,.*?)?>/(.*)',
         complete_name
     )
 
-    depth, cycle, smoother, n = m[0]
+    depth, cycle, smoother, threads, n = m[0]
+    
+    if threads != '':
+        threads = int(threads[1:])
+        name = f'{cycle}({depth})-{get_smoother_abbreviation(smoother)} ({threads} threads)'
+    else:
+        name = f'{cycle}({depth})-{get_smoother_abbreviation(smoother)}'
 
-    return (f'{cycle}({depth})-{get_smoother_abbreviation(smoother)}', int(n))
+    return (name, int(n))
 
 
 
@@ -52,3 +58,4 @@ def parse(json_path):
 
 if __name__ == '__main__':
     print(process_name("BM_step<2,MgCycle::V,UpdateStrategy::GaussSeidel>/4"))
+    print(process_name("BM_step<2,MgCycle::V,UpdateStrategy::GaussSeidel,2>/4"))
