@@ -147,3 +147,20 @@ add_custom_target(
 	COMMAND example_smoother_comparison > out
 	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/convergence_history.py out
 )
+
+
+# custom rules for benchmarking
+add_custom_target(
+	benchmark_omp
+	DEPENDS bench_omp
+	COMMAND ./bench_omp --benchmark_out=omp.json --benchmark_out_format=json
+	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/speedup.py omp.json
+)
+
+
+add_custom_target(
+	benchmark_vcycle
+	DEPENDS bench_vcycle
+	COMMAND ./bench_vcycle --benchmark_out=vcycle.json --benchmark_out_format=json
+	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/speedup.py vcycle.json
+)
