@@ -72,11 +72,28 @@ class IsotropicPoisson2D : public Problem {
 		void set_initial_approximation(double u[], const InitializationStrategy strategy) const override;
 
 
-	private:
+	protected:
 		const int rows;
 		const int cols;
 		const double hx;
 		const double hy;
+
+		std::vector<double> xx;
+		std::vector<double> yy;
+};
+
+
+class AnisotropicPoisson2D : public IsotropicPoisson2D {
+	public:
+		AnisotropicPoisson2D(
+			const std::pair<double, double> bottom_left_corner,
+			const std::pair<double, double> top_right_corner,
+			const int n,
+			const std::function<double(double,double)> f,
+			const std::function<double(double,double)> boundary,
+			const std::function<double(double,double)> c
+		);
+		~AnisotropicPoisson2D() = default;
 };
 
 

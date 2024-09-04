@@ -95,11 +95,10 @@ IsotropicPoisson2D::IsotropicPoisson2D(
 	rows(n),
 	cols(n),
 	hx((top_right_corner.first - bottom_left_corner.first) / (n-1.0)),
-	hy((top_right_corner.second - bottom_left_corner.second) / (n-1.0))
+	hy((top_right_corner.second - bottom_left_corner.second) / (n-1.0)),
+	xx(n),
+	yy(n)
 {
-	std::vector<double> xx(n);
-	std::vector<double> yy(n);
-
 	for (int i = 0; i < n; ++i) {
 		xx[i] = linspace(bottom_left_corner.first, top_right_corner.first, n, i);
 		yy[i] = linspace(bottom_left_corner.second, top_right_corner.second, n, i);
@@ -124,6 +123,39 @@ IsotropicPoisson2D::IsotropicPoisson2D(
 
 	for (int i = 0; i < n; ++i) {
 		rhs[n * (n-1) + i] = boundary(xx[i], yy[n-1]);
+	}
+}
+
+
+AnisotropicPoisson2D::AnisotropicPoisson2D(
+	const std::pair<double, double> bottom_left_corner,
+	const std::pair<double, double> top_right_corner,
+	const int n,
+	const std::function<double(double,double)> f,
+	const std::function<double(double,double)> boundary,
+	const std::function<double(double,double)> c
+) :
+	IsotropicPoisson2D(bottom_left_corner, top_right_corner, n, f, boundary)
+{
+	// @DESIGN: I'm aware of the repetition in mesh calculation and rhs access, but it's partially justified by the one time use
+	// To solve this performance problem I would have to make this the default class and the IsotropicPoisson2D would be just constructing this class
+	// with c(x,y) == 1
+
+	std::vector<double> xx(n);
+	std::vector<double> yy(n);
+
+	for (int i = 0; i < n; ++i) {
+		xx[i] = linspace(bottom_left_corner.first, top_right_corner.first, n, i);
+		yy[i] = linspace(bottom_left_corner.second, top_right_corner.second, n, i);
+	}
+
+	for (int row = 1; row < n; ++row) {
+		const int start = n * row;
+		const int end   = start + n - 1;
+
+		for (int i = start + 1; i < end; ++i) {
+			rhs[i] /= c(xx[i - start], yy[row]);
+		}
 	}
 }
 
