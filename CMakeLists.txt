@@ -194,5 +194,5 @@ add_custom_target(
 
 add_custom_target(
 	poisson_sycl ALL
-	COMMAND ${SYCLCC} ${SYCLCCFLAGS} -I ${CMAKE_SOURCE_DIR}/include -I ${CMAKE_SOURCE_DIR}/sycl -o poisson_sycl ${SYCL_SRC} ${LIB_SRC}
+	COMMAND ${SYCLCC} ${SYCLCCFLAGS} -I ${CMAKE_SOURCE_DIR}/include -I ${CMAKE_SOURCE_DIR}/sycl -o poisson_sycl ${SYCL_SRC}
 )

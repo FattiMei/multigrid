@@ -51,3 +51,12 @@ The project implements a geometric multigrid solver for 1D and 2D square grids. 
   * `make benchmark_vcycle`: compares non parallelizable gauss-seidel multigrid with parallelizable but weaker red-black and SOR multigrid and plots the speedup
   * `make benchmark_cycle`: compares the performance of same depth V, F and W cycles and plot the speedup
   * `make benchmark_fused`: plots the speedup of kernel fusion optimizations against openmp best multigrid solver
+
+
+## SYCL executable
+When configured right, in this branch the compilation will produce an executable, here is how to call it:
+```(bash)
+    ./poisson_sycl <max number of nodes>
+```
+
+The program implements the red-black and jacobi smoother and profiles the kernel invocations. It offers an estimate about GPU acceleration potential of the multigrid solver (currently not suitable for my hardware)

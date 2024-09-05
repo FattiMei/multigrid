@@ -1,9 +1,6 @@
 #include <iostream>
 #include <chrono>
 #include <CL/sycl.hpp>
-#include <eigen3/Eigen/Sparse>
-#include "multigrid.hpp"
-#include "stencil.hpp"
 
 
 // @DESIGN: I could include GPU abstraction into the already polymorphic design,
