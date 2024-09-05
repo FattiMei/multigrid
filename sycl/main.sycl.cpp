@@ -17,17 +17,22 @@
 
 
 int main(int argc, char* argv[]) {
-	// SYCL code here...
 	cl::sycl::queue q;
+
+	if (argc != 2) {
+		std::cerr << "Usage: ./poisson_sycl <max number of nodes>" << std::endl;
+		return 1;
+	}
 
 	int maxnodes = std::atoi(argv[1]);
 
 	double *u      = cl::sycl::malloc_device<double>(maxnodes * maxnodes, q);
+	double *tmp    = cl::sycl::malloc_device<double>(maxnodes * maxnodes, q);
 	double *rhs    = cl::sycl::malloc_device<double>(maxnodes * maxnodes, q);
 	double *res    = cl::sycl::malloc_device<double>(maxnodes * maxnodes, q);
 	double *coarse = cl::sycl::malloc_device<double>(maxnodes * maxnodes, q);
 
-	std::cout << "n,smoother" << std::endl;
+	std::cout << "n,red-black,jacobi" << std::endl;
 
 	for (int n = 32; n < maxnodes; n *= 2) {
 		const int m = n+1;
@@ -72,6 +77,32 @@ int main(int argc, char* argv[]) {
 						if ((row + col) % 2 == 1) {
 							u[i] = (hx*hx*rhs[i] - u[i-1] - u[i+1] - u[i+m] - u[i-m]) / 4.0;
 						}
+					}
+				);
+			}).wait();
+
+			const auto t2 = std::chrono::high_resolution_clock::now();
+			const std::chrono::duration<double,std::milli> delta = t2 - t1;
+			std::cout << delta.count() << "ms,";
+		}
+		{
+			const auto t1 = std::chrono::high_resolution_clock::now();
+
+
+			cl::sycl::range<2> work_items{static_cast<size_t>(m-2), static_cast<size_t>(m-2)};
+
+			// assign only inner nodes to threads
+			q.submit([&](cl::sycl::handler& cgh) {
+				cgh.parallel_for<class relaxing_kernel>(
+					work_items,
+					[=](cl::sycl::id<2> tid) {
+						const int row = tid[0]+1;
+						const int col = tid[1]+1;
+
+						const int i = row * m + col;
+						const double hx = 1.0 / (m-1.0);
+
+						tmp[i] = (hx*hx*rhs[i] - u[i-1] - u[i+1] - u[i+m] - u[i-m]) / 4.0;
 					}
 				);
 			}).wait();
