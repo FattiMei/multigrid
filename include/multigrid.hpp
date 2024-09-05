@@ -101,6 +101,9 @@ namespace MgCycle {
 	std::vector<MgOp> V(const int levels, const int smoothing_steps = 1, const bool solve = true);
 	std::vector<MgOp> F(const int levels, const int smoothing_steps = 1, const bool solve = true);
 	std::vector<MgOp> W(const int levels, const int smoothing_steps = 1, const bool solve = true);
+
+	// @DESIGN (duct tape): this is a mock function but I need it for filtering benchmarks
+	std::vector<MgOp> VF(const int levels, const int smoothing_steps = 1, const bool solve = true);
 }
 
 

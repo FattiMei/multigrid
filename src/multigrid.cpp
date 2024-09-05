@@ -494,6 +494,11 @@ std::vector<MgOp> MgCycle::V(const int levels_one_indexed, const int smoothing_s
 }
 
 
+std::vector<MgOp> MgCycle::VF(const int levels, const int smoothing_steps, const bool solve) {
+	return MgCycle::V(levels, smoothing_steps, solve);
+}
+
+
 std::vector<MgOp> MgCycle::F(const int levels_one_indexed, const int smoothing_steps, const bool solve) {
 	const int levels   = levels_one_indexed - 1;
 	const auto MgSolve = solve ? MgOp::DirectSolve : MgOp::Relax;
