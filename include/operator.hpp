@@ -30,6 +30,7 @@ class DiscreteOperator {
 };
 
 
+// @DESIGN: this is not used in the codebase, but provides a possible implementation of more sophisticated, non-stencil based operators
 struct SparseOperator {
 	public:
 		SparseOperator(
@@ -39,19 +40,12 @@ struct SparseOperator {
 			const std::vector<double> &weights
 		);
 
-		Eigen::SparseMatrix<double> build_sparse_repr();
 
-		const int problem_size;
+	protected:
 		const std::vector<int>    &offset;
 		const std::vector<int>    &neighbours;
 		const std::vector<double> &weights;
 };
-
-
-
-
-void compute_residual     (const SparseOperator &A, const double b[], const double u[], double r[]);
-void compute_residual_norm(const SparseOperator &A, const double b[], const double u[]);
 
 
 #endif

@@ -67,8 +67,6 @@ MgSolver::MgSolver(
 		if (direct_solver.info() != Eigen::Success) {
 			throw std::runtime_error("Eigen has failed to factorize the matrix");
 		}
-
-		// direct_solver.compute(grid_operator.back()->get_sparse_repr());
 	}
 }
 
@@ -445,12 +443,6 @@ std::vector<std::pair<int,int>> compute_grid_dim(const Problem* problem, const i
 		}
 	}
 
-	/* DEBUG
-	for (auto& [a, b] : grid_size) {
-		std::cout << a << ' ' << b << std::endl;
-	}
-	*/
-
 	return grid_size;
 }
 
@@ -470,8 +462,8 @@ std::vector<int> compute_grid_size(const std::vector<std::pair<int,int>>& sizes)
 }
 
 
-// I could in principle precompute the number of MgOps given the cycle spec to optimize the allocations...
 std::vector<MgOp> MgCycle::V(const int levels_one_indexed, const int smoothing_steps, const bool solve) {
+	// I could in principle precompute the number of MgOps given the cycle spec to optimize the allocations...
 	const int levels = levels_one_indexed - 1;
 	std::vector<MgOp> result;
 
@@ -499,6 +491,11 @@ std::vector<MgOp> MgCycle::V(const int levels_one_indexed, const int smoothing_s
 	}
 
 	return result;
+}
+
+
+std::vector<MgOp> MgCycle::VF(const int levels, const int smoothing_steps, const bool solve) {
+	return MgCycle::V(levels, smoothing_steps, solve);
 }
 
 

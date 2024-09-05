@@ -1,5 +1,5 @@
-#ifndef __PERIODIC_HPP__
-#define __PERIODIC_HPP__
+#ifndef __CIRCUIT_HPP__
+#define __CIRCUIT_HPP__
 
 
 #include "problem.hpp"

@@ -3,7 +3,6 @@
 #include "utils.hpp"
 #include <cmath>
 #include <stdexcept>
-#include <iostream>
 
 
 IsotropicPoisson1D::IsotropicPoisson1D(
@@ -77,7 +76,7 @@ void IsotropicPoisson1D::set_initial_approximation(double u[], const Initializat
 
 		case InitializationStrategy::Lerp: {
 			for (int i = 1; i < n-1; ++i) {
-				u[i] = linspace(rhs[0], rhs[1], n, i);
+				u[i] = linspace(rhs[0], rhs[n-1], n, i);
 			}
 		} break;
 	}
@@ -94,7 +93,7 @@ IsotropicPoisson2D::IsotropicPoisson2D(
 	Problem(n*n),
 	rows(n),
 	cols(n),
-	hx((top_right_corner.first - bottom_left_corner.first) / (n-1.0)),
+	hx((top_right_corner.first  - bottom_left_corner.first) / (n-1.0)),
 	hy((top_right_corner.second - bottom_left_corner.second) / (n-1.0)),
 	xx(n),
 	yy(n)
@@ -141,14 +140,6 @@ AnisotropicPoisson2D::AnisotropicPoisson2D(
 	// To solve this performance problem I would have to make this the default class and the IsotropicPoisson2D would be just constructing this class
 	// with c(x,y) == 1
 
-	std::vector<double> xx(n);
-	std::vector<double> yy(n);
-
-	for (int i = 0; i < n; ++i) {
-		xx[i] = linspace(bottom_left_corner.first, top_right_corner.first, n, i);
-		yy[i] = linspace(bottom_left_corner.second, top_right_corner.second, n, i);
-	}
-
 	for (int row = 1; row < n; ++row) {
 		const int start = n * row;
 		const int end   = start + n - 1;
@@ -188,6 +179,7 @@ DiscreteOperator* IsotropicPoisson2D::get_discrete_operator(const int level) con
 
 
 void IsotropicPoisson2D::set_initial_approximation(double u[], const InitializationStrategy strategy) const {
+	// ignoring the lerp strategy, future work might expand on this
 	(void) strategy;
 
 	for (int i = 0; i < rows; ++i) {

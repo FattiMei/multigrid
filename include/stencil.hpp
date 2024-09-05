@@ -22,7 +22,7 @@ class NaiveThreePointStencil : public DiscreteOperator {
 };
 
 
-// assumes a 1D grid with extremal points at boundary, employs a careful formula to minimize round-off
+// assumes a 1D grid with extremal points at boundary, employs a formula to minimize round-off
 class ThreePointStencil : public DiscreteOperator {
 	public:
 		ThreePointStencil(const int n, const double h, const std::array<double,3> weights);

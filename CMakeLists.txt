@@ -6,7 +6,12 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 
-# do a manual optimization
+# manually insert the path to the adaptiveCpp SYCL compiler (or equivalent SYCL compilers)
+set(SYCLCC "/usr/local/bin/acpp")
+set(SYCLCCFLAGS "-O3")
+
+
+# manually apply optimization flags (might experiment with -O3 -ftree-vectorize...)
 add_compile_options(-O2)
 add_compile_options(-Wall -Wextra -Wpedantic)
 
@@ -19,8 +24,10 @@ if (OpenMP_CXX_FOUND)
 endif()
 
 
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Eigen3 REQUIRED NO_MODULE)
 find_package(Python3 REQUIRED)
+
+# github.com/google/benchmark for microbenchmarking of C/C++ code and compact result generation
 find_package(benchmark REQUIRED)
 find_package(AdaptiveCpp CONFIG REQUIRED)
 
@@ -30,11 +37,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
 elseif(MSVC)
 	add_compile_options(/W4 /WX)
 endif()
-
-
-# manually insert the path to the adaptiveCpp SYCL compiler (or equivalent SYCL compilers)
-set(SYCLCC "/usr/local/bin/acpp")
-set(SYCLCCFLAGS "-O3")
 
 
 set(INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include")
@@ -171,6 +173,22 @@ add_custom_target(
 	DEPENDS bench_vcycle
 	COMMAND ./bench_vcycle --benchmark_out=vcycle.json --benchmark_out_format=json
 	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/speedup.py vcycle.json
+)
+
+
+add_custom_target(
+	benchmark_cycle
+	DEPENDS bench_cycle
+	COMMAND ./bench_cycle --benchmark_out=cycle.json --benchmark_out_format=json
+	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/speedup.py cycle.json
+)
+
+
+add_custom_target(
+	benchmark_fused
+	DEPENDS bench_fused
+	COMMAND ./bench_fused --benchmark_out=fused.json --benchmark_out_format=json
+	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/speedup.py fused.json
 )
 
 
