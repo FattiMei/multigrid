@@ -1,31 +1,33 @@
 #include <iostream>
 #include <cmath>
 #include <memory>
+#include "symbolic.h"
 #include "poisson.hpp"
 #include "multigrid.hpp"
 
 
 int main() {
-	constexpr int n       = (2 << 8) + 1;
-	constexpr int maxiter = 10;
+	constexpr int n       = (2 << 10) + 1;
+	constexpr int maxiter = 20;
 
 	IsotropicPoisson2D problem(
 		{0.0, 0.0},
 		{1.0, 1.0},
 		n,
-		[](double x, double y){ return x + y; },
-		[](double x, double y){ return 0.0; }
+		forcing_term_2d,
+		solution_2d
 	);
 
 	const auto smoother     = UpdateStrategy::GaussSeidel;
-	const auto restriction  = injection_restriction_2d;
+	const auto restriction  = full_weight_restriction_2d;
 	const auto prolongation = linear_prolongation_2d;
 
+	// when problems are so big the direct solver stalls, so no 2 level
 	const std::vector<std::pair<std::string,std::shared_ptr<IterativeSolver>>> solvers{
 		// {"2-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(2, 3, false), InitializationStrategy::Zeros, smoother, restriction, prolongation)},
-		{"3-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(3, 3), InitializationStrategy::Zeros, smoother, restriction, prolongation)},
-		{"5-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(5, 3), InitializationStrategy::Zeros, smoother, restriction, prolongation)},
-		{"7-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(7, 3), InitializationStrategy::Zeros, smoother, restriction, prolongation)}
+		// {"3-level"   , std::make_shared<MgSolver>(&problem, MgCycle::V(3, 3), InitializationStrategy::Zeros, smoother, restriction, prolongation)},
+		{"V(5)-GS"   , std::make_shared<MgSolver>(&problem, MgCycle::V(5, 3), InitializationStrategy::Zeros, smoother, restriction, prolongation)},
+		{"V(7) GS"   , std::make_shared<MgSolver>(&problem, MgCycle::V(7, 3), InitializationStrategy::Zeros, smoother, restriction, prolongation)}
 	};
 
 	std::cout << "it";

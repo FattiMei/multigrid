@@ -8,9 +8,10 @@ int main() {
 	constexpr int n       = (2 << 15) + 1;
 	constexpr int maxiter = 100;
 
-	const IsotropicPoisson1D problem(
+	// if h is too small, there is instability due to floating point errors
+	const PoissonPreciseVariant problem(
 		0.0,
-		1.0,
+		1000.0,
 		n,
 		[](double x){ return x; },
 		{0.0, 0.0}

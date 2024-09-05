@@ -6,6 +6,7 @@
 
 template <UpdateStrategy SMOOTHER>
 static void smoother(benchmark::State &state) {
+	omp_set_num_threads(4);
 	const int n = state.range(0) + 1;
 
 	IsotropicPoisson2D problem(
@@ -28,7 +29,8 @@ static void smoother(benchmark::State &state) {
 }
 
 
-BENCHMARK(smoother<UpdateStrategy::GaussSeidel>)->RangeMultiplier(2)->Range(4, 256);
-BENCHMARK(smoother<UpdateStrategy::RedBlack>   )->RangeMultiplier(2)->Range(4, 256);
-BENCHMARK(smoother<UpdateStrategy::SOR>        )->RangeMultiplier(2)->Range(4, 256);
+BENCHMARK(smoother<UpdateStrategy::GaussSeidel>)->RangeMultiplier(2)->Range(32,8192);
+BENCHMARK(smoother<UpdateStrategy::RedBlack>   )->RangeMultiplier(2)->Range(32,8192);
+BENCHMARK(smoother<UpdateStrategy::SOR>        )->RangeMultiplier(2)->Range(32,8192);
+
 BENCHMARK_MAIN();
