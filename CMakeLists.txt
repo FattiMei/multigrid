@@ -22,6 +22,7 @@ endif()
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(Python3 REQUIRED)
 find_package(benchmark REQUIRED)
+find_package(AdaptiveCpp CONFIG REQUIRED)
 
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
@@ -31,16 +32,23 @@ elseif(MSVC)
 endif()
 
 
+# manually insert the path to the adaptiveCpp SYCL compiler (or equivalent SYCL compilers)
+set(SYCLCC "/usr/local/bin/acpp")
+set(SYCLCCFLAGS "-O3")
+
+
 set(INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include")
 
 set(LIB_SRC_DIR         "${CMAKE_SOURCE_DIR}/src")
 set(TEST_SRC_DIR        "${CMAKE_SOURCE_DIR}/test")
+set(SYCL_SRC_DIR        "${CMAKE_SOURCE_DIR}/sycl")
 set(BENCH_SRC_DIR       "${CMAKE_SOURCE_DIR}/benchmark")
 set(EXAMPLES_SRC_DIR    "${CMAKE_SOURCE_DIR}/examples")
 set(ARTIFACTS_SRC_DIR   "${CMAKE_SOURCE_DIR}/artifacts")
 
 file(GLOB LIB_SRC       "${LIB_SRC_DIR}/*.cpp")
 file(GLOB TEST_SRC      "${TEST_SRC_DIR}/test_*.cpp")
+file(GLOB SYCL_SRC      "${SYCL_SRC_DIR}/*.sycl.cpp")
 file(GLOB BENCH_SRC     "${BENCH_SRC_DIR}/*.cpp")
 file(GLOB EXAMPLES_SRC  "${EXAMPLES_SRC_DIR}/example_*.cpp")
 file(GLOB ARTIFACTS_SRC "${ARTIFACTS_SRC_DIR}/*")
@@ -163,4 +171,10 @@ add_custom_target(
 	DEPENDS bench_vcycle
 	COMMAND ./bench_vcycle --benchmark_out=vcycle.json --benchmark_out_format=json
 	COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/plot/speedup.py vcycle.json
+)
+
+
+add_custom_target(
+	poisson_sycl ALL
+	COMMAND ${SYCLCC} ${SYCLCCFLAGS} -I ${CMAKE_SOURCE_DIR}/include -I ${CMAKE_SOURCE_DIR}/sycl -o poisson_sycl ${SYCL_SRC} ${LIB_SRC}
 )
