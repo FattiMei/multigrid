@@ -23,9 +23,9 @@ The `SYCL` branch has a SYCL compiler dependency, further compilation instructio
 
 ## Overview
 The project implements a geometric multigrid solver for 1D and 2D square grids. It uses C++ runtime polimorphism to capture the variability of PDE problems. It essentially boils down to specializing three virtual classes:
-  * *Problem*: has knowledge about the discretization used and the system rhs, returns an
-  * *Operator*: knows how to relax the solution and can produce a sparse matrix representation of itself
-  * *Solver*: given a problem, applies multigrid solver (or an iterative one) to a privately owned solution and is problem & operator agnostic
+  * **Problem**: has knowledge about the discretization used and the system rhs, returns an
+  * **Operator**: knows how to relax the solution and can produce a sparse matrix representation of itself
+  * **Solver**: given a problem, applies multigrid solver (or an iterative one) to a privately owned solution and is problem & operator agnostic
 
 
 ## Features
