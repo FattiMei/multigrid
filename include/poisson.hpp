@@ -93,7 +93,6 @@ class AnisotropicPoisson2D : public IsotropicPoisson2D {
 			const std::function<double(double,double)> boundary,
 			const std::function<double(double,double)> c
 		);
-		~AnisotropicPoisson2D() = default;
 };
 
 

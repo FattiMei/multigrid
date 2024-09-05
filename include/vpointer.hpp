@@ -4,9 +4,9 @@
 template<typename T>
 class PointerVariant {
 	public:
-		PointerVariant()           : type(Type::Const)  ,   const_ptr(nullptr) {}
-		PointerVariant(T *p)       : type(Type::Mutable),   mutable_ptr(p)     {}
-		PointerVariant(const T *p) : type(Type::Const)  ,   const_ptr(p)       {}
+		PointerVariant()           : type(Type::Const)  , const_ptr(nullptr) {}
+		PointerVariant(const T *p) : type(Type::Const)  , const_ptr(p)       {}
+		PointerVariant(T *p)       : type(Type::Mutable), mutable_ptr(p)     {}
 
 
 		const T* get_const_ptr() const {
@@ -23,7 +23,7 @@ class PointerVariant {
 					break;
 
 				case Type::Const:
-					throw std::runtime_error("Attempt to use a const pointer for non-const purpuoses");
+					throw std::runtime_error("Attempt to use a const pointer for non-const purposes");
 					break;
 
 				// std::unreachable will be available in C++23

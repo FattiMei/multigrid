@@ -1,3 +1,7 @@
+#ifndef __DIRECT_HPP__
+#define __DIRECT_HPP__
+
+
 #include "solvers.hpp"
 #include <iostream>
 #include <eigen3/Eigen/Sparse>
@@ -52,3 +56,6 @@ class SymmetricSolver : public BaseSolver {
 		const double h;
 		EigenSparseSolver solver;
 };
+
+
+#endif
