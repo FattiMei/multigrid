@@ -1,7 +1,4 @@
 import numpy as np
-import scipy
-import direct
-import iterative
 
 
 class Poisson1D:
@@ -9,12 +6,13 @@ class Poisson1D:
         assert(n > 3)
         assert(inf < sup)
 
-        h = (sup-inf) / (n-1.0)
+        self.n = n
+        self.h = (sup-inf) / (n-1.0)
         self.mesh = np.linspace(inf, sup, n)
-        self.stencil = np.array([1.0,-2.0,1.0]) / (h*h)
+        self.stencil = np.array([1.0,-2.0,1.0]) / self.h**2
 
         # transfinite interpolation
-        x = np.linspace(inf, sup, n)
+        x = np.linspace(0.0, 1.0, n)
         self.w = boundary(inf) * (1.0-x) + boundary(sup) * x
 
         # this rhs solves for the homogeneous dirichlet problem

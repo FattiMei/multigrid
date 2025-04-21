@@ -3,7 +3,7 @@ import scipy
 
 
 class DirectSolver:
-    def __init__(self, n: int, stencil):
+    def __init__(self, problem):
         pass
 
 
@@ -12,22 +12,35 @@ class DirectSolver:
 
 
 class SparseSolver(DirectSolver):
-    def __init__(self, n: int, stencil):
-        self.name = 'sparse'
+    name = 'spsolve'
+
+    def __init__(self, problem):
 
         # Assumes a 3 point stencil and stores only internal points
-        self.A = scipy.sparse.diags(stencil, [-1,0,1], shape=(n-2,n-2)).tocsr()
+        self.A = scipy.sparse.diags(
+            problem.stencil,
+            [-1,0,1],
+            shape=(problem.n-2,problem.n-2)
+        ).tocsr()
 
 
     def solve(self, rhs):
         return scipy.sparse.linalg.spsolve(self.A, rhs)
 
 
+# the fast poisson solver requires `h`, so I made the constructor take whatever it needs from the problem
 class FastSolver(DirectSolver):
-    # REMARK: works only for the homogeneous regular 1D Poisson problem
-    def __init__(self, n: int, stencil):
-        self.name = 'fast-poisson'
+    name = 'fast-poisson'
+
+    def __init__(self, problem):
+        self.h = problem.h
 
 
     def solve(self, rhs):
-        pass
+        n = len(rhs)
+
+        f_hat = scipy.fft.dst(rhs, type=1)
+        eigs = -(2.0 * (1.0 - np.cos(np.pi * np.arange(1,n+1) / (n+1)))) / self.h**2
+        u_hat = f_hat / eigs
+
+        return scipy.fft.idst(u_hat, type=1)
