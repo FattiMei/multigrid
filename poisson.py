@@ -1,4 +1,5 @@
 import numpy as np
+from stencil import Stencil1D
 
 
 class Poisson1D:
@@ -9,18 +10,14 @@ class Poisson1D:
         self.n = n
         self.h = (sup-inf) / (n-1.0)
         self.mesh = np.linspace(inf, sup, n)
-        self.stencil = np.array([1.0,-2.0,1.0]) / self.h**2
+        self.stencil = Stencil1D(np.array([1.0,-2.0,1.0]) / self.h**2)
 
         # transfinite interpolation
         x = np.linspace(0.0, 1.0, n)
         self.w = boundary(inf) * (1.0-x) + boundary(sup) * x
 
         # this rhs solves for the homogeneous dirichlet problem
-        self.rhs = forcing(self.mesh[1:-1]) + np.convolve(
-            self.w,
-            self.stencil,
-            mode='valid'
-        )
+        self.rhs = forcing(self.mesh[1:-1]) + self.stencil.apply(self.w, mode='valid')
 
 
     def assemble(self, homogeneous_solution):
