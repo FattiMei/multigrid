@@ -16,7 +16,7 @@ class SparseSolver(DirectSolver):
     name = 'spsolve'
 
     def __init__(self, problem):
-        self.A = problem.stencil.build_sparse_matrix(problem.n)
+        self.A = problem.stencil.build_sparse_matrix(problem.size)
 
 
     def solve(self, rhs):
@@ -31,6 +31,7 @@ class FastSolver(DirectSolver):
         self.h = problem.h
 
 
+    # at the moment this works only for 1D Poisson problems, but maybe we could generalize it
     def solve(self, rhs):
         n = len(rhs)
 

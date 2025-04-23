@@ -1,14 +1,16 @@
 import numpy as np
+import jax.numpy as jnp
+
+
+def dot(a, b):
+    return jnp.sum(a * b)
 
 
 class IterativeSolver:
     def __init__(self, problem, init=None):
-        assert(problem.n > 0)
-
         if init is None:
-            self.x = problem.stencil.apply(np.zeros(problem.n))
+            self.x = problem.empty()
         else:
-            assert(init.ndim == 1)
             self.x = init
 
         self.stencil = problem.stencil
@@ -28,9 +30,7 @@ class JacobiSolver(IterativeSolver):
 
     def __init__(self, problem, init=None):
         super().__init__(problem, init)
-
-        center = len(self.stencil.data) // 2
-        self.diag = self.stencil.data[center]
+        self.diag = self.stencil.center()
 
 
     def step(self):
@@ -47,7 +47,7 @@ class GradientSolver(IterativeSolver):
     def step(self):
         # I'm happy with non optimal implementations, this is just to have another method to test
         residual = self.residual()
-        gamma = np.dot(residual, residual) / np.dot(residual, self.stencil.apply(residual, mode='same'))
+        gamma = dot(residual, residual) / dot(residual, self.stencil.apply(residual, mode='same'))
 
         self.x = self.x + gamma * residual
 
@@ -59,14 +59,18 @@ class ConjugateGradient(IterativeSolver):
         super().__init__(problem, init)
 
         self.p = self.residual()
+        self.r = self.p
 
 
     def step(self):
-        r = self.residual()
-        alpha = np.dot(r,r) / np.dot(self.p, self.stencil.apply(self.p, mode='same'))
+        r = self.r
+        alpha = dot(r,r) / dot(self.p, self.stencil.apply(self.p, mode='same'))
 
         self.x = self.x + alpha * self.p
-        r_ = r - alpha * self.stencil.apply(self.p, mode='same')
 
-        beta = np.dot(r_,r_) / np.dot(r,r)
+        # to protect from numerical instability we recompute the residual
+        r_ = self.residual()
+
+        beta = dot(r_,r_) / dot(r,r)
         self.p = r_ + beta * self.p
+        self.r = r_
