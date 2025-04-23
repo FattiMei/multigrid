@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 from poisson import Poisson1D
 from direct import SparseSolver, FastSolver
+from iterative import JacobiSolver, GradientSolver, ConjugateGradient
 
 
 def convergence_test(problem_factory, solvers, nodes, norm=np.linalg.norm):
@@ -30,6 +31,25 @@ def convergence_test(problem_factory, solvers, nodes, norm=np.linalg.norm):
     plt.show()
 
 
+def iteration_test(problem, solvers, maxit: int, norm=np.linalg.norm):
+    assert(maxit > 0)
+
+    plt.title("Convergence behaviour for iterative methods")
+
+    for solver in solvers:
+        residuals = np.empty(maxit)
+        solver = solver(problem)
+
+        for i in range(maxit):
+            residuals[i] = norm(solver.residual())
+            solver.step()
+
+        plt.semilogy(residuals, label=solver.name)
+
+    plt.legend()
+    plt.show()
+
+
 if __name__ == '__main__':
     import sympy as sym
     from sympy.abc import x
@@ -45,7 +65,13 @@ if __name__ == '__main__':
     nodes = 10 ** np.arange(1,6)
 
     convergence_test(
-        lambda n: Poisson1D(n, inf, sup, forcing, boundary),
+        problem_factory,
         [SparseSolver, FastSolver],
         nodes
+    )
+
+    iteration_test(
+        problem_factory(1000),
+        [JacobiSolver, GradientSolver, ConjugateGradient],
+        maxit=1000
     )
