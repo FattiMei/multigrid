@@ -12,6 +12,9 @@ class Poisson1D:
         self.mesh = np.linspace(inf, sup, n)
         self.stencil = Stencil1D(np.array([1.0,-2.0,1.0]) / self.h**2)
 
+        self.forcing = forcing
+        self.boundary = boundary
+
         # transfinite interpolation
         x = np.linspace(0.0, 1.0, n)
         self.w = boundary(inf) * (1.0-x) + boundary(sup) * x
@@ -21,7 +24,8 @@ class Poisson1D:
 
 
     def assemble(self, homogeneous_solution):
-        result = self.w
+        # we need a copy, otherwise multiple solvers will corrupt this piece of data
+        result = np.copy(self.w)
         result[1:-1] += homogeneous_solution
 
         return result

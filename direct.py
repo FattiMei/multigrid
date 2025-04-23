@@ -11,17 +11,12 @@ class DirectSolver:
         pass
 
 
+# can solve homogeneous Dirichlet problems of every dimensionality, provided a stencil
 class SparseSolver(DirectSolver):
     name = 'spsolve'
 
     def __init__(self, problem):
-
-        # Assumes a 3 point stencil and stores only internal points
-        self.A = scipy.sparse.diags(
-            problem.stencil,
-            [-1,0,1],
-            shape=(problem.n-2,problem.n-2)
-        ).tocsr()
+        self.A = problem.stencil.build_sparse_matrix(problem.n)
 
 
     def solve(self, rhs):
