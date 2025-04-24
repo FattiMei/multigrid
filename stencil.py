@@ -1,12 +1,8 @@
 import os
 import scipy
+import numpy as np
 
-if os.environ.get('USE_JAX') is None:
-    import numpy as np
-    from scipy.signal import convolve2d
-else:
-    import jax.numpy as np
-    from jax.scipy.signal import convolve2d
+from scipy.signal import convolve2d
 
 
 class Stencil:
@@ -26,7 +22,6 @@ class Stencil:
         pass
 
 
-
 class Stencil1D(Stencil):
     ndim = 1
 
@@ -43,31 +38,12 @@ class Stencil1D(Stencil):
 
 
     def build_sparse_matrix(self, n: int):
-        assert(self.data.size == 3)
-        assert(n > 2)
-
-        # idx  = np.arange(n)
-        # rows = []
-        # cols = []
-        # data = []
-        #
-        # for i in range(self.data.shape[0]):
-        #     offset = self.data.shape[0]//2 - i
-        #     neighbours = idx - offset
-        #
-        #     valid = np.argwhere((neighbours >= 0) & (neighbours < n)).flatten()
-        #
-        #     rows.append(idx[valid])
-        #     cols.append(neighbours[valid])
-        #     data.append(self.data[i] * np.ones(len(valid)))
-        #
-        # return scipy.sparse.coo_array(
-        #     (np.concat(data), (np.concat(rows), np.concat(cols)))
-        # ).tocsr()
+        size = len(self.data)
+        offsets = np.arange(size) - size//2
 
         return scipy.sparse.diags(
             self.data,
-            [-1,0,1],
+            offsets,
             shape=(n-2,n-2)
         ).tocsr()
 
@@ -92,6 +68,17 @@ class Stencil2D(Stencil):
 
     def build_sparse_matrix(self, size: tuple[int, int]):
         assert(self.data.shape == (3,3))
+
+        n,m = size
+        N = (n-2) * (m-2)
+
+        offsets = np.array([-1,0,1])
+
+        return scipy.sparse.diags(
+            self.data.flatten(),
+            (offsets + n*offsets[:, None]).flatten(),
+            shape=(N,N)
+        ).tocsr()
 
 
     def center(self):

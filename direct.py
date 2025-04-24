@@ -20,7 +20,7 @@ class SparseSolver(DirectSolver):
 
 
     def solve(self, rhs):
-        return scipy.sparse.linalg.spsolve(self.A, rhs)
+        return scipy.sparse.linalg.spsolve(self.A, rhs.flatten()).reshape(rhs.shape)
 
 
 # the fast poisson solver requires `h`, so I made the constructor take whatever it needs from the problem
