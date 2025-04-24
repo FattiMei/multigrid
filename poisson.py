@@ -49,6 +49,33 @@ class Poisson1D(Problem):
         return result
 
 
+def lifting_function(g, X, Y):
+    ''' I can't make this work, this lifting makes my solver diverge
+    g_x0 = g(0, Y[0, :])      # Left edge
+    g_x1 = g(1, Y[-1, :])     # Right edge
+    g_y0 = g(X[:, 0], 0)      # Bottom edge
+    g_y1 = g(X[:, -1], 1)     # Top edge
+
+    # Corners
+    g_00 = g(0, 0)
+    g_10 = g(1, 0)
+    g_01 = g(0, 1)
+    g_11 = g(1, 1)
+
+    # Interpolate across domain
+    u_p = (
+        (1 - Y) * g_y0[:, np.newaxis] + Y * g_y1[:, np.newaxis] +
+        (1 - X) * g_x0[np.newaxis, :] + X * g_x1[np.newaxis, :] -
+        ((1 - X) * (1 - Y) * g_00 +
+        X * (1 - Y) * g_10 +
+        (1 - X) * Y * g_01 +
+        X * Y * g_11)
+    )
+    '''
+
+    return g(X,Y)
+
+
 class Poisson2D(Problem):
     def __init__(self, xlim: tuple[float, float], ylim: tuple[float, float], size: tuple[int, int], forcing, boundary):
         self.xlim = np.array(xlim)
@@ -56,10 +83,10 @@ class Poisson2D(Problem):
         self.size = np.array(size)
         self.inner_size = self.size-2
 
-        self.mesh = np.meshgrid(
-            np.linspace(xlim[0], xlim[1], size[0]),
-            np.linspace(ylim[0], ylim[1], size[1])
-        )
+        x = np.linspace(xlim[0], xlim[1], size[0])
+        y = np.linspace(ylim[0], ylim[1], size[1])
+
+        self.mesh = np.meshgrid(x,y, indexing='ij')
 
         h = np.diff(np.stack([self.xlim, self.ylim])).reshape(-1) / (self.size-1)
         self.h = h
@@ -72,28 +99,8 @@ class Poisson2D(Problem):
         self.forcing = forcing
         self.boundary = boundary
 
-        # transfinite interpolation (Coons patch)
-        # u = np.linspace(0,1,size[0])
-        # v = np.linspace(0,1,size[1])
-        # uu, vv = np.meshgrid(u,v)
-        #
-        # boundary_left = boundary(xlim[0], np.linspace(ylim[0], ylim[1], size[1]))
-        # boundary_right = boundary(xlim[1], np.linspace(ylim[0], ylim[1], size[1]))
-        # boundary_top = boundary(np.linspace(xlim[0], xlim[1], size[0]), ylim[1])
-        # boundary_bottom = boundary(np.linspace(xlim[0], xlim[1], size[0]), ylim[0])
-        #
-        # L = (1-uu) * boundary_left + uu * boundary_right
-        # B = (1-vv) * boundary_bottom + vv * boundary_top
-        #
-        # corner_blend = (
-        #     (1-uu) * (1-vv) * boundary_bottom[0] +
-        #     uu * (1-vv) * boundary_bottom[-1] +
-        #     (1-uu) * vv * boundary_top[0] +
-        #     uu * vv * boundary_top[-1]
-        # )
-        # self.w = L + B - corner_blend
-
-        self.w = boundary(*self.mesh)
+        # transfinite interpolation, Coons patch doesn't work
+        self.w = lifting_function(boundary, self.mesh[0], self.mesh[1])
 
         # this rhs solves for the homogeneous dirichlet problem
         self.rhs = forcing(

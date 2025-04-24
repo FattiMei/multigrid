@@ -26,8 +26,6 @@ def convergence_test(problem_factory, solvers, nodes, norm=np.linalg.norm):
                 norm(sol - exact)
             )
 
-    print(err)
-
     plt.title("$||u - \\tilde{u}||$ - 2nd order expected")
     plt.loglog(nodes, 1.0 / nodes**2, label='$O(N^{-2})$')
 
@@ -62,38 +60,6 @@ def iteration_test(problem, solvers, maxit: int, norm=np.linalg.norm):
     plt.show()
 
 
-def discretization_test(u, nodes, norm=np.linalg.norm):
-    laplacian = sym.lambdify(
-        (x,y),
-        sym.diff(u, (x,2)) + sym.diff(u, (y,2))
-    )
-    u = sym.lambdify((x,y), u)
-
-    err = []
-
-    for n in nodes:
-        problem = Poisson2D(
-            (0.0, 1.0),
-            (0.0, 1.0),
-            (n,n),
-            lambda x,y: 0.0 * x,
-            lambda x,y: 0.0 * x
-        )
-
-        stencil = problem.stencil
-        exact = laplacian(problem.mesh[0][1:-1,1:-1], problem.mesh[1][1:-1,1:-1])
-
-        err.append(
-            norm(exact - stencil.apply(u(*problem.mesh), mode='valid'))
-        )
-
-    plt.title("Discretization error")
-    plt.loglog(nodes, 1 / nodes**2, label='$O(N^{-2})$')
-    plt.loglog(nodes, err, label='err')
-    plt.legend()
-    plt.show()
-
-
 if __name__ == '__main__':
     u = sym.sin(x + y) + sym.exp(-x*x + y)
     f = sym.diff(u, (x,2)) + sym.diff(u, (y,2))
@@ -107,11 +73,6 @@ if __name__ == '__main__':
         (n,n),
         forcing, boundary
     )
-
-    def funky_norm(a):
-        b = np.copy(a)
-        b[1:-1,1:-1] = 0
-        return np.max(np.abs(b))
 
     convergence_test(
         problem_factory,
