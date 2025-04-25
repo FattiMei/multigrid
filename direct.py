@@ -40,3 +40,18 @@ class FastSolver(DirectSolver):
         u_hat = f_hat / eigs
 
         return scipy.fft.idst(u_hat, type=1)
+
+
+class FastSolver2D(FastSolver):
+    def solve(self, rhs):
+        m,n = rhs.shape
+        hx, hy = self.h[0], self.h[1]
+
+        f_hat = scipy.fft.dstn(rhs, type=1)
+
+        eigx = 2.0 * (np.cos(np.pi * np.arange(1,m+1) / (m+1)) - 1.0) / hx**2
+        eigy = 2.0 * (np.cos(np.pi * np.arange(1,n+1) / (n+1)) - 1.0) / hy**2
+
+        u_hat = f_hat / (eigx[:,None] + eigy[None,:])
+
+        return scipy.fft.idstn(u_hat, type=1)

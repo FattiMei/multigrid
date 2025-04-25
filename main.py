@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from poisson import Poisson1D, Poisson2D
-from direct import SparseSolver, FastSolver
+from direct import SparseSolver, FastSolver, FastSolver2D
 from iterative import JacobiSolver, GradientSolver, ConjugateGradient
 
 from time import perf_counter
@@ -76,13 +76,13 @@ if __name__ == '__main__':
 
     convergence_test(
         problem_factory,
-        [SparseSolver],
+        [SparseSolver, FastSolver2D],
         2 ** np.arange(3,7),
         norm=lambda x: np.max(np.abs(x))
     )
 
-    # iteration_test(
-    #     problem_factory(128),
-    #     [JacobiSolver, GradientSolver, ConjugateGradient],
-    #     maxit=1000
-    # )
+    iteration_test(
+        problem_factory(128),
+        [JacobiSolver, GradientSolver, ConjugateGradient],
+        maxit=1000
+    )
